@@ -215,10 +215,12 @@ guest เข้าหน้าคุ้มครอง, logout/session, AJAX ema
 production config) — ทุกเคสรันจริงบน PHP 8.2/Apache ไม่ใช่การคาดเดา
 
 **Q: upload รูปปลอดภัยยังไง?**
-(1) ตรวจขนาด ≤2 MB และชนิดจริงด้วย `getimagesize()` ไม่เชื่อนามสกุล/`Content-Type`
+(1) ตรวจขนาด ≤20 MB และชนิดจริงด้วย `getimagesize()` ไม่เชื่อนามสกุล/`Content-Type`
 (2) เปลี่ยนชื่อไฟล์เป็น `bin2hex(random_bytes(16))` เก็บแค่ path ใน DB
 (3) โฟลเดอร์ `uploads/` มี `.htaccess` ปิด directory listing + block PHP รัน
 (4) ลบไฟล์เก่าทุกครั้งที่เปลี่ยนรูป/ลบรูป/ลบประกาศ (`includes/image_upload.php`)
+โชว์ภาพเป็นสี่เหลี่ยมจัตุรัส 1:1 เท่ากันทุกการ์ด (CSS `aspect-ratio: 1/1` +
+`object-fit: cover`) และมีพรีวิวทันทีหลังเลือกไฟล์ (FileReader ใน main.js)
 
 **Q: ข้อจำกัดของระบบนี้?**
 - ไม่มี rate limiting / lockout (ขอบเขตเล็ก)

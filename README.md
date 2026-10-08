@@ -19,7 +19,8 @@ Users can:
 - Choose Donate or Exchange
 - Edit/delete their own announcements
 - Mark their own item as Completed
-- Attach one optional photo to an announcement (JPG/PNG/GIF, up to 2 MB)
+- Attach one optional photo to an announcement (JPG/PNG/GIF, up to 20 MB,
+  shown as a uniform 1:1 square with an instant preview when choosing it)
 - Contact the owner using the contact information provided
 
 The system does not handle payments, delivery, or internal request/approval workflows.
