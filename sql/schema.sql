@@ -1,9 +1,3 @@
-CREATE DATABASE IF NOT EXISTS msu_share_care
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE msu_share_care;
-
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
