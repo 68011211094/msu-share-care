@@ -1,149 +1,331 @@
 # MSU Share & Care
 
-Web Application for Mahasarakham University students to share unused items through **Donate** or **Exchange**.
+ระบบ **กระดานแจ้งแบ่งปันของ** สำหรับนักศึกษามหาวิทยาลัยมหาสารคาม (เพื่อใช้เป็นโครงงาน
+Web Programming) นักศึกษาสามารถโพสต์สิ่งของที่ไม่ได้ใช้แล้ว เพื่อ **บริจาค (Donate)**
+หรือ **แลกเปลี่ยน (Exchange)** ให้กับเพื่อน ๆ ในมหาวิทยาลัย
 
-## Project Type
+---
 
-Web Programming term project.
+## สารบัญ
 
-## Main Concept
+1. [โปรเจกต์นี้คืออะไร](#1-โปรเจกต์นี้คืออะไร)
+2. [ฟีเจอร์ทั้งหมด](#2-ฟีเจอร์ทั้งหมด)
+3. [เทคโนโลยีที่ใช้](#3-เทคโนโลยีที่ใช้)
+4. [โครงสร้างโฟลเดอร์](#4-โครงสร้างโฟลเดอร์)
+5. [สิ่งที่ต้องเตรียม](#5-สิ่งที่ต้องเตรียม)
+6. [วิธีติดตั้งบน XAMPP](#6-วิธีติดตั้งบน-xampp)
+7. [วิธีสร้างบัญชีแอดมิน](#7-วิธีสร้างบัญชีแอดมิน)
+8. [คู่มือใช้งานหน้าต่าง ๆ](#8-คู่มือใช้งานหน้าต่าง ๆ)
+9. [ความปลอดภัย](#9-ความปลอดภัย)
+10. [การตั้งค่าเมื่อนำไป Deploy จริง](#10-การตั้งค่าเมื่อนำไป-deploy-จริง)
+11. [การ Deploy บนโฮสต์ฟรี](#11-การ-deploy-บนโฮสต์ฟรี)
+12. [การทดสอบด้วยมือ (Manual Smoke Test)](#12-การทดสอบด้วยมือ-manual-smoke-test)
+13. [การทดสอบอัตโนมัติ](#13-การทดสอบอัตโนมัติ)
+14. [ไฟล์เอกสารอื่น ๆ](#14-ไฟล์เอกสารอื่น ๆ)
 
-MSU Share & Care is a community bulletin board.
+---
 
-Users can:
+## 1. โปรเจกต์นี้คืออะไร
 
-- Register
-- Login / Logout
-- View item announcements
-- Create item announcements
-- Choose Donate or Exchange
-- Edit/delete their own announcements
-- Mark their own item as Completed
-- Attach one optional photo to an announcement (JPG/PNG/GIF, up to 20 MB,
-  shown as a uniform 1:1 square with an instant preview when choosing it)
-- Contact the owner using the contact information provided
+MSU Share & Care เป็นเว็บแอปพลิเคชันแบบ **Community Bulletin Board**
+(กระดานข่าวชุมชน) ที่เปิดให้นักศึกษา:
 
-The system does not handle payments, delivery, or internal request/approval workflows.
+- แจ้งสิ่งของที่อยากแบ่งปัน (**Donate**) หรืออยากแลก (**Exchange**)
+- ผู้สนใจดูประกาศ แล้วติดต่อเจ้าของผ่านช่องทางที่เขียนไว้
 
-## Planned Technology
+ระบบนี้ **ไม่ใช่** ร้านค้าออนไลน์ — ไม่มีการชำระเงิน ค่าขนส่ง หรือการดีลจบภายในเว็บ
+(ตามขอบเขตของโครงงาน)
 
-- HTML5
-- CSS3
-- JavaScript
-- jQuery
-- AJAX / Fetch
-- PHP
-- MySQL
-- Apache / XAMPP
-- Git / GitHub
+หลักการพัฒนา:
 
-## Development Principle
+> สร้างแอปเล็ก ๆ ที่ถูกต้อง ปลอดภัย อ่านง่าย อธิบายอาจารย์ได้ และ deploy ได้จริง
 
-Build a small, correct, secure, readable, explainable, and deployable application.
+---
 
-See `PROJECT.md` for the full project specification.
+## 2. ฟีเจอร์ทั้งหมด
 
-See `AGENTS.md` for AI/development rules.
+### ฝั่งผู้ใช้ (User)
 
-## Requirements
+| ฟีเจอร์ | รายละเอียด |
+|---|---|
+| สมัครสมาชิก | ใช้อีเมล + รหัสผ่าน (อย่างน้อย 8 ตัว) ระบบตรวจอีเมลซ้ำแบบเรียลไทม์ (AJAX) |
+| เข้าสู่ระบบ / ออกจากระบบ | ใช้ PHP Session + `password_verify()` |
+| ดูประกาศ | หน้าแรกแสดงประกาศทั้งหมด เรียงใหม่ล่าสุดก่อน |
+| สร้างประกาศ | เลือก type = Donate หรือ Exchange + รายละเอียด + ช่องทางติดต่อ |
+| อัปโหลดรูปภาพ | ไม่บังคับ รองรับ JPG/PNG/GIF ขนาดไม่เกิน **20 MB** แสดงผลเป็นสี่เหลี่ยม **1:1** เท่ากันทุกการ์ด + มีพรีวิวทันทีตอนเลือกรูป |
+| แก้ไขประกาศของตัวเอง | เปลี่ยนข้อมูล / เปลี่ยนรูป / ลบรูป (ไฟล์เก่าลบออกจากระบบอัตโนมัติ) |
+| ลบประกาศของตัวเอง | ลบพร้อมรูปภาพด้วย |
+| ทำเครื่องหมาย Completed | เมื่อของถูกแบ่งปันแล้ว เจ้าของเป็นคนจัดการเอง |
 
-- XAMPP (Apache, MySQL/MariaDB, PHP 8.x)
-- Apache must allow `.htaccess` (`AllowOverride All` — the default in XAMPP)
+### ฝั่งแอดมิน (Admin)
 
-## Setup (XAMPP)
+| ฟีเจอร์ | รายละเอียด |
+|---|---|
+| Dashboard | ดูสถิติ: ผู้ใช้ทั้งหมด, ประกาศทั้งหมด, Available, Completed, Donate, Exchange |
+| จัดการผู้ใช้ | ดูรายชื่อผู้ใช้ จำนวนประกาศแต่ละคน บทบาท |
+| จัดการประกาศ | ดูประกาศทั้งหมด และลบประกาศที่ไม่เหมาะสมได้ |
 
-1. Copy this folder into `C:\xampp\htdocs\msu-share-care`.
-2. Start **Apache** and **MySQL** in the XAMPP Control Panel.
-3. Create the database, then import `sql/schema.sql` into it:
+> **หมายเหตุ:** แอดมินทำได้แค่ "ดู + ลบ" เท่านั้น ไม่สามารถแก้ไขประกาศของคนอื่นได้
 
-   - **phpMyAdmin:** New → database name `msu_share_care` → Import → choose `sql/schema.sql`.
-   - **CLI:**
+---
 
-     ```bash
-     mysql -u root -e "CREATE DATABASE msu_share_care CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-     mysql -u root msu_share_care < sql/schema.sql
-     ```
-4. Create a least-privilege database user (replace `your_password` with your own password):
+## 3. เทคโนโลยีที่ใช้
 
-   ```sql
-   CREATE USER 'msu_app'@'localhost' IDENTIFIED BY 'your_password';
-   GRANT SELECT, INSERT, UPDATE, DELETE ON msu_share_care.* TO 'msu_app'@'localhost';
-   FLUSH PRIVILEGES;
-   ```
+- **HTML5** + **CSS3** — โครงสร้างหน้าเว็บ และการออกแบบ responsive (ใช้ได้ทั้งมือถือ-แท็บเล็ต-พีซี)
+- **JavaScript + jQuery 3.7.1** — เมนูมือถือ, confirm ก่อนลบ, พรีวิวรูป
+- **AJAX** — ตรวจอีเมลซ้ำตอนสมัคร (`check_email.php`) โดยไม่ต้องรีโหลดหน้า
+- **PHP 8.x** — เขียนแบบ procedural อ่านง่าย ไม่ใช้ framework (ตามโจทย์รายวิชา)
+- **MySQL / MariaDB** — ฐานข้อมูล 2 ตาราง `users` และ `items`
+- **Apache / XAMPP** — สำหรับพัฒนาและทดสอบบนเครื่อง
+- **Git / GitHub** — จัดการเวอร์ชันโค้ด
 
-5. Copy `.env.example` to `.env` and fill in your values:
+---
 
-   ```text
-   DB_NAME=msu_share_care
-   DB_USER=msu_app
-   DB_PASS=your_password
-   ```
+## 4. โครงสร้างโฟลเดอร์
 
-6. Open `http://localhost/msu-share-care/`.
-7. Register an account, then promote it to admin:
+```text
+msu-share-care/
+├── index.php               # หน้าแรก (แสดงประกาศทั้งหมด)
+├── register.php            # สมัครสมาชิก
+├── login.php               # เข้าสู่ระบบ
+├── logout.php              # ออกจากระบบ
+├── my_items.php            # ประกาศของฉัน
+├── item_create.php         # สร้างประกาศ
+├── item_edit.php           # แก้ไขประกาศ
+├── item_detail.php         # ดูรายละเอียดประกาศ
+├── item_delete.php         # ลบประกาศ (POST + CSRF)
+├── item_complete.php       # ทำเครื่องหมาย Completed (POST + CSRF)
+├── check_email.php         # AJAX endpoint ตรวจอีเมลซ้ำ (คืน JSON)
+├── admin/
+│   ├── dashboard.php       # หน้าแอดมิน (สถิติ)
+│   ├── users.php           # จัดการผู้ใช้ (ดู)
+│   └── items.php           # จัดการประกาศ (ดู/ลบ)
+├── includes/               # โค้ดที่ใช้ร่วมกัน (ทุกหน้า require ไฟล์เหล่านี้)
+│   ├── config.php          # โหลดค่า .env + path ต่าง ๆ
+│   ├── db_connect.php      # เชื่อมต่อฐานข้อมูล (PDO + prepared statements)
+│   ├── auth.php            # require_login / require_admin / require_owned_item
+│   ├── csrf.php            # สร้าง + ตรวจ CSRF token
+│   ├── validation.php      # ฟังก์ชัน validate ต่าง ๆ
+│   ├── image_upload.php    # ฟังก์ชันบันทึก/ลบไฟล์รูป (ในโฟลเดอร์ uploads/)
+│   ├── header.php          # เปิด HTML + โหลด CSS
+│   ├── nav.php             # แถบเมนูบนสุด
+│   └── footer.php          # ปิด HTML + โหลด jQuery
+├── config/                 # ตั้งค่า session + โหลดค่า .env (config.php, db.php)
+├── sql/schema.sql          # สคริปต์สร้างตารางฐานข้อมูล
+├── assets/
+│   ├── css/style.css       # สไตล์ทั้งหมด
+│   └── js/
+│       ├── jquery-3.7.1.min.js
+│       └── main.js         # เมนูมือถือ / confirm / พรีวิวรูป / AJAX
+├── uploads/                # ที่เก็บไฟล์รูป (ห้าม PHP รันในนี้)
+├── tests/                  # สคริปต์ทดสอบอัตโนมัติ (PowerShell)
+├── .env.example            # ตัวอย่างไฟล์ตั้งค่า (คัดลอกไปเป็น .env)
+├── .htaccess               # ป้องกันการเข้าถึงไฟล์อ่อนไหว
+└── .gitignore              # ไม่นำ .env และไฟล์รูปขึ้น GitHub
+```
 
-   ```sql
-   UPDATE users SET role = 'admin' WHERE email = 'your_email@example.com';
-   ```
+---
 
-## Production Configuration
+## 5. สิ่งที่ต้องเตรียม
 
-- Set `APP_DEBUG=false` in `.env` on the server. Error details are then hidden from
-  visitors and only written to the PHP error log.
-- `.env` contains secrets and is gitignored. Never commit it. Deploy by copying
-  `.env.example` and filling in real values on the server only.
-- `.htaccess` blocks HTTP access to `sql/`, `config/`, `includes/`, dotfiles,
-  `.sql` and `.md` files, and disables directory listing.
-- The application logs in with a database user that only has
-  SELECT / INSERT / UPDATE / DELETE (no schema changes).
-- Passwords are stored with `password_hash()`; all SQL uses prepared statements;
-  all output is escaped; every state-changing POST requires a CSRF token.
+- [XAMPP](https://www.apachefriends.org/) เวอร์ชันล่าสุด (มี Apache + MySQL + PHP 8.x ครบ)
+- Apache ต้องอนุญาตให้ใช้ `.htaccess` ได้ (`AllowOverride All` — ค่าเริ่มต้นของ XAMPP เป็นแบบนี้อยู่แล้ว)
+- (Optional) VS Code + Git สำหรับแก้โค้ดและจัดการเวอร์ชัน
 
-## Hosting Notes
+---
 
-- Any Apache + PHP 8.x + MySQL host works. The app runs from the document root
-  or from a subdirectory (all links are relative).
-- `mod_rewrite` must be enabled for `.htaccess` rules to apply.
-- Keep `APP_DEBUG=false` and the database credentials private in production.
-- For a step-by-step free hosting guide (InfinityFree and alternatives), see
-  `DEPLOY.md`.
+## 6. วิธีติดตั้งบน XAMPP
 
-## Manual Smoke Test
+ทำตามทีละขั้น:
 
-1. Register → auto login → nav shows user name.
-2. Create an item (Donate and Exchange); optionally attach a photo and it
-   appears on the home page and on the detail page.
-3. Edit own item → change saved; replace or remove the photo (old file is
-   deleted). Mark as Completed → status changes.
-4. Open the item in a second browser (different account) → visible, but no
-   edit/delete controls; POST-ing the edit URL directly returns 403.
-5. Delete own item → removed.
-6. Log in as admin → dashboard stats, user list, item list; admin delete works.
-7. Log out → session ends (revisiting my page redirects to login).
-8. Visit `/.env`, `/sql/schema.sql`, `/config/`, `/includes/` → 403.
+**ขั้นที่ 1 — วางโค้ด**
 
-## Automated Tests
+คัดลอกโฟลเดอร์โปรเจกต์ไปไว้ที่ `C:\xampp\htdocs\msu-share-care`
 
-The `tests/` folder contains PowerShell test suites (224 assertions total):
+**ขั้นที่ 2 — เปิด Apache และ MySQL**
 
-- `tests/phase4_tests.ps1` — item CRUD, validation, ownership (56 assertions)
-- `tests/phase5_tests.ps1` — admin dashboard, user list, item list (32 assertions)
-- `tests/phase7_tests.ps1` — auth, CSRF, XSS/SQLi, roles, session, AJAX email check, image upload (136 assertions)
+เปิด XAMPP Control Panel แล้วกด **Start** ที่ Apache และ MySQL
 
-Prerequisites:
+**ขั้นที่ 3 — สร้างฐานข้อมูล**
 
-- The app is served at `http://127.0.0.1:8080` (change `$base` at the top of
-  the script if your URL differs, e.g. `http://localhost/msu-share-care`).
-- MySQL CLI is at `C:\xampp\mysql\bin\mysql.exe` (change `$mysql` if needed).
-- Windows PowerShell.
+- ผ่าน **phpMyAdmin** (เปิด http://localhost/phpmyadmin):
+  1. กด "New" → ชื่อฐานข้อมูล `msu_share_care`
+  2. เลือก "utf8mb4_unicode_ci"
+  3. กด Create
+  4. เลือกฐานข้อมูล → แท็บ Import → เลือกไฟล์ `sql/schema.sql` → กด Go
 
-Run from the project folder:
+- หรือผ่าน Command Prompt:
+
+```bash
+mysql -u root -e "CREATE DATABASE msu_share_care CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root msu_share_care < sql/schema.sql
+```
+
+**ขั้นที่ 4 — สร้างผู้ใช้ฐานข้อมูล (แนะนำเพื่อความปลอดภัย)**
+
+สร้างผู้ใช้ที่สิทธิ์เท่าที่จำเป็นเท่านั้น (SELECT/INSERT/UPDATE/DELETE —
+ไม่มีสิทธิ์แก้โครงสร้างตาราง):
+
+```sql
+CREATE USER 'msu_app'@'localhost' IDENTIFIED BY 'ใส่รหัสผ่านของคุณเอง';
+GRANT SELECT, INSERT, UPDATE, DELETE ON msu_share_care.* TO 'msu_app'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+> **สำคัญ:** อย่าใช้รหัสผ่านจริงหรือรหัสที่เดาง่าย อย่าอัปโหลดไฟล์ `.env` ขึ้น GitHub
+
+**ขั้นที่ 5 — สร้างไฟล์ .env**
+
+คัดลอก `.env.example` แล้วเปลี่ยนชื่อเป็น `.env` จากนั้นกรอกค่าให้ถูกต้อง:
+
+```text
+DB_NAME=msu_share_care
+DB_USER=msu_app
+DB_PASS=รหัสผ่านที่ตั้งไว้
+APP_DEBUG=true
+```
+
+> `APP_DEBUG=true` ไว้ตอนพัฒนา (จะโชว์ error ให้เห็นเพื่อแก้ไข) ตอนขึ้นจริงต้องเป็น `false`
+
+**ขั้นที่ 6 — เปิดเว็บ**
+
+เปิดเบราว์เซอร์ไปที่: http://localhost/msu-share-care/
+
+**ขั้นที่ 7 — สร้างบัญชีแอดมิน**
+
+1. กด "สมัครสมาชิก" แล้วสมัครบัญชีแรกของคุณ
+2. ทำการ promote บัญชีนั้นเป็นแอดมินด้วยคำสั่ง SQL ใน phpMyAdmin:
+
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'อีเมลของคุณ@example.com';
+```
+
+---
+
+## 7. วิธีสร้างบัญชีแอดมิน
+
+ระบบกำหนดให้ทุกคนที่สมัครเป็น `user` ธรรมดาเสมอ (กันการสมัครเป็นแอดมินเอง)
+แอดมินต้องถูกตั้งค่าโดยคนที่ดูแลฐานข้อมูล
+
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'อีเมลของคุณ@example.com';
+```
+
+---
+
+## 8. คู่มือใช้งานหน้าต่าง ๆ
+
+| หน้า | URL | เข้าใช้งานได้เมื่อ |
+|---|---|---|
+| หน้าแรก | `index.php` | ทุกคน (guest) |
+| สมัครสมาชิก | `register.php` | ทุกคน |
+| เข้าสู่ระบบ | `login.php` | ทุกคน |
+| ประกาศของฉัน | `my_items.php` | สมาชิก |
+| สร้างประกาศ | `item_create.php` | สมาชิก |
+| แก้ไข/ลบประกาศ | `item_edit.php?id=..` / `item_delete.php` | **เจ้าของประกาศเท่านั้น** (ไม่ใช่เจ้าของ → 403) |
+| ดูรายละเอียด | `item_detail.php?id=..` | ทุกคน |
+| Admin Dashboard | `admin/dashboard.php` | แอดมินเท่านั้น (ไม่ใช่แอดมิน → 403) |
+
+---
+
+## 9. ความปลอดภัย
+
+ระบบได้ปกป้องช่องโหว่พื้นฐานทั้งหมด (ตามมาตรฐานโครงงาน Web Programming):
+
+| รายการ | วิธีป้องกัน |
+|---|---|
+| SQL Injection | ใช้ prepared statements (PDO) ทุกคำสั่งที่รับข้อมูลจากผู้ใช้ |
+| XSS | ใช้ `htmlspecialchars()` หนีอักขระทุกจุดที่แสดงผลข้อมูล |
+| CSRF | ทุกฟอร์ม POST ต้องมี CSRF token ตรวจด้วย `hash_equals` |
+| Session fixation | เรียก `session_regenerate_id(true)` หลัง login/สมัครสำเร็จ |
+| Session hijack | คุกกี้ session ตั้ง `httponly` + `SameSite=Lax` |
+| Password รั่ว | เก็บด้วย `password_hash()` (bcrypt) ไม่มีรหัสผ่านเปล่าในฐานข้อมูล |
+| เข้าถึงข้อมูลคนอื่น | ตรวจ `owner_id` ทั้งฝั่ง PHP (`require_owned_item()`) และใน SQL (`WHERE id = ? AND owner_id = ?`) |
+| อัปโหลดรูปไม่ปลอดภัย | ตรวจชนิดไฟล์จริงด้วย `getimagesize()` + เปลี่ยนชื่อไฟล์สุ่ม + โฟลเดอร์ `uploads/` block การรัน PHP |
+| Config รั่ว | `.env` อยู่ใน `.gitignore` + `.htaccess` บล็อก `sql/`, `config/`, `includes/`, ไฟล์ dotfile |
+
+---
+
+## 10. การตั้งค่าเมื่อนำไป Deploy จริง
+
+- ตั้ง `APP_DEBUG=false` ในไฟล์ `.env` — error รายละเอียดจะถูกซ่อนจากผู้ใช้ และเขียนลง error log แทน
+- **ห้าม commit ไฟล์ `.env`** เพราะมี password อยู่ ให้ deploy โดยคัดลอก `.env.example` แล้วกรอกค่าจริงบนเซิร์ฟเวอร์เท่านั้น
+- `.htaccess` ที่โฟลเดอร์หลักจะบล็อกการเข้าถึง `sql/`, `config/`, `includes/`, ไฟล์ `.sql`, `.md` และปิด directory listing
+- ข้อมูลผู้ใช้ระบบใช้ผู้ใช้ฐานข้อมูลที่มีสิทธิ์แค่ SELECT/INSERT/UPDATE/DELETE (ไม่มีสิทธิ์แก้ schema)
+
+---
+
+## 11. การ Deploy บนโฮสต์ฟรี
+
+เปิดดูคู่มือทีละขั้นในไฟล์ **[DEPLOY.md](DEPLOY.md)** ซึ่งแนะนำ:
+
+- การสมัคร **InfinityFree** (ฟรี ไม่ต้องใช้บัตรเครดิต รองรับ PHP + MySQL)
+- การสร้างฐานข้อมูลผ่าน phpMyAdmin และ import `sql/schema.sql`
+- การอัปโหลดไฟล์ผ่าน File Manager
+- วิธีจัดการปัญหา 500 ที่พบบ่อย
+
+> **เตือน:** GitHub Pages / Netlify / Vercel รองรับเฉพาะเว็บแบบ static (HTML/CSS/JS
+> ล้วน) **ไม่สามารถรัน PHP ได้** — อย่าใช้กับโปรเจกต์นี้
+
+---
+
+## 12. การทดสอบด้วยมือ (Manual Smoke Test)
+
+ทดสอบตามลำดับนี้เพื่อเช็คว่าระบบทำงานครบ:
+
+1. สมัครสมาชิก → เข้าสู่ระบบอัตโนมัติ → เมนูแสดงชื่อผู้ใช้
+2. สร้างประกาศ (ลองทั้ง Donate และ Exchange) → ประกาศขึ้นหน้าแรก
+   - ลองแนบรูป → รูปแสดงบนหน้าแรกและหน้ารายละเอียดเป็นสี่เหลี่ยม 1:1
+3. แก้ไขประกาศของตัวเอง → ข้อมูลเปลี่ยน; ลองเปลี่ยนรูป / ลบรูป; กด Completed → สถานะเปลี่ยน
+4. เปิดดูประกาศของอีกบัญชีหนึ่ง (คนอื่น) → เห็นได้ แต่ไม่มีปุ่มแก้ไข/ลบ
+   และถ้า POST แก้ไข URL ตรง ๆ ระบบจะคืน 403
+5. ลบประกาศของตัวเอง → รายการหายไป (รวมไฟล์รูป)
+6. เข้าแอดมิน → เห็นสถิติ, รายชื่อผู้ใช้, รายการประกาศ และลบประกาศได้
+7. ออกจากระบบ → เข้า `my_items.php` ใหม่ต้องถูกเด้งไปหน้า login
+8. ลองเข้า `/.env`, `/sql/schema.sql`, `/config/`, `/includes/` → ต้องได้ 403
+
+---
+
+## 13. การทดสอบอัตโนมัติ
+
+ในโฟลเดอร์ `tests/` มีชุดทดสอบ PowerShell รวม **224 assertions**:
+
+| ชุดทดสอบ | ครอบคลุมอะไร | จำนวน |
+|---|---|---|
+| `tests/phase4_tests.ps1` | item CRUD, validation, ownership (Case A/B/C/D) | 56 |
+| `tests/phase5_tests.ps1` | admin dashboard, user list, item list | 32 |
+| `tests/phase7_tests.ps1` | auth, CSRF, XSS/SQLi, roles, session, AJAX email check, image upload | 136 |
+
+**สิ่งที่ต้องเตรียมก่อนรัน:**
+
+- เว็บต้องรันอยู่ที่ `http://127.0.0.1:8080` (ถ้า URL ต่าง ให้แก้ `$base` บรรทัดบนสุด
+  ให้ตรง เช่น `http://localhost/msu-share-care`)
+- MySQL CLI อยู่ที่ `C:\xampp\mysql\bin\mysql.exe` (แก้ `$mysql` ถ้าต่าง)
+- ใช้ Windows PowerShell
+
+**วิธีรัน (จากโฟลเดอร์โปรเจกต์):**
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tests\phase7_tests.ps1
 ```
 
-**Warning:** every suite resets the database first (deletes all users and
-items) so its results are independent. After running the tests, restore demo
-data with the seed SQL in `PRESENTATION.md` or by re-importing
-`sql/schema.sql`.
+**คำเตือนสำคัญ:**
+ทุกชุดทดสอบจะ **ล้างฐานข้อมูลก่อนรัน** (ลบผู้ใช้และประกาศทั้งหมด) เพื่อให้ผลลัพธ์เป็น
+อิสระต่อกัน หลังรันเสร็จให้กู้ข้อมูล demo กลับคืนด้วยสคริปต์ seed ที่ระบุใน `PRESENTATION.md`
+หรือ re-import `sql/schema.sql` แล้วลงข้อมูลใหม่
+
+---
+
+## 14. ไฟล์เอกสารอื่น ๆ
+
+| ไฟล์ | ใช้ดูเรื่องอะไร |
+|---|---|
+| `PROJECT.md` | ข้อกำหนด/ขอบเขตของโครงงาน (Requirement) ฉบับเต็ม |
+| `AGENTS.md` | กฎการพัฒนา (สแตกที่ใช้ ขอบเขต ความปลอดภัย มาตรฐานโค้ด) |
+| `PRESENTATION.md` | คู่มือนำเสนอ: โครงสร้างระบบ, ตารางความปลอดภัย, Q&A ที่ควรเตรียม |
+| `DEPLOY.md` | ขั้นตอน Deploy ฟรีทีละขั้น (InfinityFree) |
+| `sql/schema.sql` | สคริปต์สร้างฐานข้อมูล |
+
+---
+
+*MSU Share & Care — Web Programming term project*
