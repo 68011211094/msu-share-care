@@ -103,7 +103,7 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="item_edit.php?id=<?php echo $itemId; ?>" novalidate>
+        <form method="post" action="item_edit.php?id=<?php echo $itemId; ?>">
             <?php echo csrf_field(); ?>
 
             <label for="title">ชื่อสิ่งของ *</label>

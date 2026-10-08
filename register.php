@@ -116,7 +116,7 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="register.php" novalidate>
+        <form method="post" action="register.php">
             <?php echo csrf_field(); ?>
 
             <label for="full_name">ชื่อ-นามสกุล *</label>
@@ -126,6 +126,7 @@ require __DIR__ . '/includes/header.php';
             <label for="email">อีเมล *</label>
             <input type="email" id="email" name="email" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['email'], ENT_QUOTES, 'UTF-8'); ?>">
+            <small id="email-status" class="form-status"></small>
 
             <label for="password">รหัสผ่าน * (อย่างน้อย 8 ตัวอักษร)</label>
             <input type="password" id="password" name="password" minlength="8" required>

@@ -61,7 +61,7 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="login.php" novalidate>
+        <form method="post" action="login.php">
             <?php echo csrf_field(); ?>
 
             <label for="email">อีเมล</label>

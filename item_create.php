@@ -95,7 +95,7 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="item_create.php" novalidate>
+        <form method="post" action="item_create.php">
             <?php echo csrf_field(); ?>
 
             <label for="title">ชื่อสิ่งของ *</label>

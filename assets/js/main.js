@@ -1,21 +1,47 @@
-document.addEventListener('DOMContentLoaded', function () {
-    var toggle = document.querySelector('.nav-toggle');
-    var nav = document.querySelector('.site-nav');
+jQuery(function ($) {
+    var $toggle = $('.nav-toggle');
+    var $nav = $('.site-nav');
 
-    if (toggle && nav) {
-        toggle.addEventListener('click', function () {
-            var isOpen = nav.classList.toggle('is-open');
-            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        });
-    }
+    $toggle.on('click', function () {
+        var isOpen = $nav.toggleClass('is-open').hasClass('is-open');
+        $toggle.attr('aria-expanded', isOpen ? 'true' : 'false');
+    });
 
-    document.addEventListener('submit', function (event) {
-        var form = event.target;
-
-        if (form.hasAttribute('data-confirm')) {
-            if (!window.confirm(form.getAttribute('data-confirm'))) {
-                event.preventDefault();
-            }
+    $(document).on('submit', 'form[data-confirm]', function (event) {
+        if (!window.confirm($(this).attr('data-confirm'))) {
+            event.preventDefault();
         }
     });
+
+    // AJAX: ตรวจอีเมลซ้ำตอนออกจากช่องอีเมล (หน้าสมัครสมาชิกเท่านั้น)
+    var $emailStatus = $('#email-status');
+
+    if ($emailStatus.length) {
+        $('#email').on('blur', function () {
+            var email = $.trim(this.value);
+
+            $emailStatus.removeClass('form-status-ok form-status-bad');
+
+            if (email === '') {
+                $emailStatus.text('');
+                return;
+            }
+
+            $emailStatus.text('กำลังตรวจอีเมล...');
+
+            $.getJSON('check_email.php', { email: email })
+                .done(function (data) {
+                    if (!data.valid) {
+                        $emailStatus.text('รูปแบบอีเมลไม่ถูกต้อง').addClass('form-status-bad');
+                    } else if (data.available) {
+                        $emailStatus.text('อีเมลนี้ใช้ได้').addClass('form-status-ok');
+                    } else {
+                        $emailStatus.text('อีเมลนี้ถูกใช้งานแล้ว').addClass('form-status-bad');
+                    }
+                })
+                .fail(function () {
+                    $emailStatus.text('');
+                });
+        });
+    }
 });
