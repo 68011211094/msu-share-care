@@ -153,14 +153,22 @@ require __DIR__ . '/includes/header.php';
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
 
-            <label for="image">รูปภาพ (ไม่บังคับ — ขนาดไม่เกิน 2 MB, รองรับ JPG/PNG/GIF)</label>
-            <?php if (!empty($item['image'])) { ?>
-                <p>
-                    <img class="detail-image" src="<?php echo htmlspecialchars(app_url($item['image']), ENT_QUOTES, 'UTF-8'); ?>"
+            <label for="image">รูปภาพ (ไม่บังคับ)</label>
+            <div class="file-upload">
+                <label class="file-upload-label" for="image">เลือกรูปภาพ</label>
+                <span class="file-upload-name" id="image-name"><?php echo !empty($item['image']) ? 'ไฟล์เดิม' : 'ยังไม่เลือกไฟล์'; ?></span>
+                <input type="file" id="image" name="image"
+                       accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+            </div>
+            <div class="preview-wrap" id="image-preview">
+                <?php if (!empty($item['image'])) { ?>
+                    <img src="<?php echo htmlspecialchars(app_url($item['image']), ENT_QUOTES, 'UTF-8'); ?>"
                          alt="รูปภาพปัจจุบัน">
-                </p>
-            <?php } ?>
-            <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                <?php } else { ?>
+                    <div class="preview-empty">ตัวอย่างภาพ (แสดงเป็นสี่เหลี่ยม 1:1) จะแสดงที่นี่</div>
+                <?php } ?>
+            </div>
+            <p class="form-hint">ขนาดไม่เกิน 20 MB รองรับ JPG/PNG/GIF</p>
             <?php if (!empty($item['image'])) { ?>
                 <label class="checkbox-label">
                     <input type="checkbox" name="remove_image" value="1"> ลบรูปภาพนี้

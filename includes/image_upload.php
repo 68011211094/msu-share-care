@@ -17,8 +17,8 @@ function handle_image_upload(&$errors)
         return null;
     }
 
-    if ($_FILES['image']['size'] > 2 * 1024 * 1024) {
-        $errors[] = 'รูปภาพต้องมีขนาดไม่เกิน 2 MB';
+    if ($_FILES['image']['size'] > 20 * 1024 * 1024) {
+        $errors[] = 'รูปภาพต้องมีขนาดไม่เกิน 20 MB';
         return null;
     }
 

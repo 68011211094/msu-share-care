@@ -13,6 +13,42 @@ jQuery(function ($) {
         }
     });
 
+    // พรีวิวรูปภาพก่อนโพสต์ (หน้าสร้าง/แก้ไขประกาศเท่านั้น)
+    var $fileInput = $('#image');
+    var $preview = $('#image-preview');
+    var $fileName = $('#image-name');
+    var $removeImage = $('#remove_image');
+
+    if ($fileInput.length) {
+        $fileInput.on('change', function () {
+            var file = this.files && this.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    $preview.html('<img src="' + event.target.result + '" alt="ตัวอย่างภาพ">');
+                };
+                reader.readAsDataURL(file);
+
+                if ($fileName.length) {
+                    $fileName.text(file.name);
+                }
+                if ($removeImage.length) {
+                    $removeImage.prop('checked', false);
+                }
+            }
+        });
+
+        if ($removeImage.length) {
+            $removeImage.on('change', function () {
+                if (this.checked) {
+                    $fileInput.val('');
+                    $fileName.text('ยังไม่เลือกไฟล์');
+                }
+            });
+        }
+    }
+
     // AJAX: ตรวจอีเมลซ้ำตอนออกจากช่องอีเมล (หน้าสมัครสมาชิกเท่านั้น)
     var $emailStatus = $('#email-status');
 

@@ -128,8 +128,17 @@ require __DIR__ . '/includes/header.php';
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
 
-            <label for="image">รูปภาพ (ไม่บังคับ — ขนาดไม่เกิน 2 MB, รองรับ JPG/PNG/GIF)</label>
-            <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+            <label for="image">รูปภาพ (ไม่บังคับ)</label>
+            <div class="file-upload">
+                <label class="file-upload-label" for="image">เลือกรูปภาพ</label>
+                <span class="file-upload-name" id="image-name">ยังไม่เลือกไฟล์</span>
+                <input type="file" id="image" name="image"
+                       accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+            </div>
+            <div class="preview-wrap" id="image-preview">
+                <div class="preview-empty">ตัวอย่างภาพ (แสดงเป็นสี่เหลี่ยม 1:1) จะแสดงที่นี่</div>
+            </div>
+            <p class="form-hint">ขนาดไม่เกิน 20 MB รองรับ JPG/PNG/GIF</p>
 
             <div class="form-actions">
                 <button type="submit" class="btn">ประกาศ</button>
