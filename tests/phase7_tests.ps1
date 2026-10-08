@@ -577,6 +577,27 @@ Assert ((Get-Sql "SELECT COUNT(*) FROM items WHERE id = $idA") -eq '1') 'Other i
 Assert ((Get-Sql 'SELECT COUNT(*) FROM users') -eq '4') 'Final: users = 4'
 Assert ((Get-Sql 'SELECT COUNT(*) FROM items') -eq '3') 'Final: items = 3'
 
+Write-Output '=== AJAX email check endpoint ==='
+
+$r = Invoke-App "$base/check_email.php?email=studenta@example.com" $sG
+Assert ($r.Status -eq 200) 'AJAX: endpoint returns 200'
+$json = $r.Content | ConvertFrom-Json
+Assert ($json.valid -eq $true) 'AJAX: existing email marked valid'
+Assert ($json.available -eq $false) 'AJAX: existing email not available'
+
+$r = Invoke-App "$base/check_email.php?email=brand.new.user@example.com" $sG
+$json = $r.Content | ConvertFrom-Json
+Assert ($json.available -eq $true) 'AJAX: new email available'
+
+$r = Invoke-App "$base/check_email.php?email=not-an-email" $sG
+$json = $r.Content | ConvertFrom-Json
+Assert ($json.valid -eq $false) 'AJAX: invalid format rejected'
+
+$sqliEmail = [uri]::EscapeDataString("' OR '1'='1")
+$r = Invoke-App "$base/check_email.php?email=$sqliEmail" $sG
+$json = $r.Content | ConvertFrom-Json
+Assert ($json.valid -eq $false) 'AJAX: SQLi-style input rejected as invalid'
+
 Write-Output ''
 Write-Output "RESULT: PASS=$script:passCount FAIL=$script:failCount"
 if ($script:failCount -gt 0) { exit 1 }
