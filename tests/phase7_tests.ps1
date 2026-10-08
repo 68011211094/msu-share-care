@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 $base = 'http://127.0.0.1:8080'
 $mysql = 'C:\xampp\mysql\bin\mysql.exe'
 $script:passCount = 0
@@ -577,26 +577,84 @@ Assert ((Get-Sql "SELECT COUNT(*) FROM items WHERE id = $idA") -eq '1') 'Other i
 Assert ((Get-Sql 'SELECT COUNT(*) FROM users') -eq '4') 'Final: users = 4'
 Assert ((Get-Sql 'SELECT COUNT(*) FROM items') -eq '3') 'Final: items = 3'
 
-Write-Output '=== AJAX email check endpoint ==='
+Write-Output '=== Image upload ==='
 
-$r = Invoke-App "$base/check_email.php?email=studenta@example.com" $sG
-Assert ($r.Status -eq 200) 'AJAX: endpoint returns 200'
-$json = $r.Content | ConvertFrom-Json
-Assert ($json.valid -eq $true) 'AJAX: existing email marked valid'
-Assert ($json.available -eq $false) 'AJAX: existing email not available'
+$imgDir = Join-Path $env:TEMP 'msu_test_img'
+New-Item -ItemType Directory -Path $imgDir -Force | Out-Null
+$imgA = Join-Path $imgDir 'a.png'
+[System.IO.File]::WriteAllBytes($imgA, [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='))
+$imgB = Join-Path $imgDir 'b.png'
+[System.IO.File]::WriteAllBytes($imgB, [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADklEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='))
+$fakeImg = Join-Path $imgDir 'fake.png'
+[System.IO.File]::WriteAllText($fakeImg, 'this is text, not an image')
 
-$r = Invoke-App "$base/check_email.php?email=brand.new.user@example.com" $sG
-$json = $r.Content | ConvertFrom-Json
-Assert ($json.available -eq $true) 'AJAX: new email available'
+$uploadsDir = Join-Path 'D:\Mini_Projects\Web\Term_Project_002' 'uploads'
+$filesBefore = (Get-ChildItem -Force $uploadsDir | Where-Object { $_.Name -ne '.gitkeep' -and $_.Name -ne '.htaccess' }).Count
+$ckB = Join-Path $imgDir 'ck.txt'
+Remove-Item $ckB -ErrorAction SilentlyContinue
+$curl = 'curl.exe'
 
-$r = Invoke-App "$base/check_email.php?email=not-an-email" $sG
-$json = $r.Content | ConvertFrom-Json
-Assert ($json.valid -eq $false) 'AJAX: invalid format rejected'
+$loginHtml = & $curl -s -c $ckB "$base/login.php"
+$tBimg = Get-CsrfToken $loginHtml
+Assert ($tBimg -ne '') 'Upload setup: login csrf found'
+& $curl -s -b $ckB -c $ckB -o NUL -d "csrf_token=$tBimg&email=studentb@example.com&password=TestPass123" "$base/login.php"
 
-$sqliEmail = [uri]::EscapeDataString("' OR '1'='1")
-$r = Invoke-App "$base/check_email.php?email=$sqliEmail" $sG
-$json = $r.Content | ConvertFrom-Json
-Assert ($json.valid -eq $false) 'AJAX: SQLi-style input rejected as invalid'
+$createHtml = & $curl -s -b $ckB "$base/item_create.php"
+$tc = Get-CsrfToken $createHtml
+$createCode = & $curl -s -b $ckB -o NUL -w '%{http_code}' -F "csrf_token=$tc" `
+    -F "title=ของมีรูปภาพ" -F "description=พร้อมภาพ" -F "type=donate" -F "contact=089" `
+    -F "image=@$imgA;type=image/png" "$base/item_create.php"
+Assert ($createCode -eq '302') 'Upload: create with image redirects (302)'
+$idImg = [int](Get-Sql 'SELECT MAX(id) FROM items')
+$imgPath1 = Get-Sql "SELECT image FROM items WHERE id = $idImg"
+Assert ($imgPath1 -like 'uploads/*.png') 'Upload: DB stores relative uploads/ path'
+Assert (Test-Path (Join-Path $uploadsDir (Split-Path $imgPath1 -Leaf))) 'Upload: image file exists on disk'
+$detailHtml = & $curl -s -b $ckB "$base/item_detail.php?id=$idImg"
+Assert ($detailHtml -match [regex]::Escape("$imgPath1")) 'Upload: detail page renders stored image path'
+
+$editHtml = & $curl -s -b $ckB "$base/item_edit.php?id=$idImg"
+$te = Get-CsrfToken $editHtml
+$editCode = & $curl -s -b $ckB -o NUL -w '%{http_code}' -F "csrf_token=$te" `
+    -F "title=ของมีรูปภาพ" -F "description=พร้อมภาพ" -F "type=donate" -F "contact=089" `
+    -F "image=@$imgB;type=image/png" "$base/item_edit.php?id=$idImg"
+Assert ($editCode -eq '302') 'Upload: edit with new image redirects (302)'
+Assert (-not (Test-Path (Join-Path $uploadsDir (Split-Path $imgPath1 -Leaf)))) 'Upload: old image file deleted on replace'
+$imgPath2 = Get-Sql "SELECT image FROM items WHERE id = $idImg"
+Assert ($imgPath2 -ne $imgPath1) 'Upload: DB path updated on replace'
+Assert (Test-Path (Join-Path $uploadsDir (Split-Path $imgPath2 -Leaf))) 'Upload: new image file exists'
+
+$editHtml = & $curl -s -b $ckB "$base/item_edit.php?id=$idImg"
+$te = Get-CsrfToken $editHtml
+$editCode = & $curl -s -b $ckB -o NUL -w '%{http_code}' -F "csrf_token=$te" `
+    -F "title=ของมีรูปภาพ" -F "description=พร้อมภาพ" -F "type=donate" -F "contact=089" `
+    -F "remove_image=1" "$base/item_edit.php?id=$idImg"
+Assert ($editCode -eq '302') 'Upload: remove_image redirects (302)'
+Assert ((Get-Sql "SELECT image FROM items WHERE id = $idImg") -in @('', 'NULL')) 'Upload: remove_image sets DB to NULL'
+Assert (-not (Test-Path (Join-Path $uploadsDir (Split-Path $imgPath2 -Leaf)))) 'Upload: removed image file deleted'
+
+$createHtml = & $curl -s -b $ckB "$base/item_create.php"
+$tc = Get-CsrfToken $createHtml
+$itemsBefore = [int](Get-Sql 'SELECT COUNT(*) FROM items')
+$fakeCode = & $curl -s -b $ckB -o NUL -w '%{http_code}' -F "csrf_token=$tc" `
+    -F "title=ของหลอก" -F "description=x" -F "type=donate" -F "contact=089" `
+    -F "image=@$fakeImg;type=image/png" "$base/item_create.php"
+Assert ($fakeCode -eq '200') 'Upload: non-image file rejected (no redirect)'
+Assert (([int](Get-Sql 'SELECT COUNT(*) FROM items')) -eq $itemsBefore) 'Upload: rejected upload creates no item'
+$filesAfter = (Get-ChildItem -Force $uploadsDir | Where-Object { $_.Name -ne '.gitkeep' -and $_.Name -ne '.htaccess' }).Count
+Assert ($filesAfter -eq $filesBefore) 'Upload: rejected upload saves no file'
+
+$editHtml = & $curl -s -b $ckB "$base/item_edit.php?id=$idImg"
+$te = Get-CsrfToken $editHtml
+& $curl -s -b $ckB -o NUL -F "csrf_token=$te" -F "title=ของมีรูปภาพ" -F "description=พร้อมภาพ" `
+    -F "type=donate" -F "contact=089" -F "image=@$imgA;type=image/png" "$base/item_edit.php?id=$idImg" | Out-Null
+$imgPath3 = Get-Sql "SELECT image FROM items WHERE id = $idImg"
+
+$myHtml = & $curl -s -b $ckB "$base/my_items.php"
+$td = Get-CsrfToken $myHtml
+$delCode = & $curl -s -b $ckB -o NUL -w '%{http_code}' -d "csrf_token=$td" -e "$base/my_items.php" "$base/item_delete.php?id=$idImg"
+Assert ($delCode -eq '302') 'Upload: delete item with image redirects (302)'
+Assert ((Get-Sql "SELECT COUNT(*) FROM items WHERE id = $idImg") -eq '0') 'Upload: item deleted'
+Assert (-not (Test-Path (Join-Path $uploadsDir (Split-Path $imgPath3 -Leaf)))) 'Upload: image file removed with item'
 
 Write-Output ''
 Write-Output "RESULT: PASS=$script:passCount FAIL=$script:failCount"

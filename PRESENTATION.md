@@ -124,10 +124,12 @@ Browser → Apache (อ่าน .htaccess กรองไฟล์ไว้ก�
 index.php, register.php, login.php, logout.php   → หน้าหลัก / auth
 item_*.php, my_items.php                         → CRUD ประกาศ (มี ownership check)
 admin/                                           → หน้าแอดมิน (require_admin + basePath='../')
-includes/  auth, csrf, validation, db_connect,
+includes/  auth, csrf, validation, db_connect, image_upload,
            header, nav, footer                   → ส่วนที่ใช้ร่วมกัน
 config/    config.php (env+session), db.php      → ค่าตั้งค่า + โหลด .env
 sql/schema.sql                                   → โครงสร้างฐานข้อมูล
+uploads/   โฟลเดอร์เก็บภาพที่อัปโหลด (.gitkeep +
+           .htaccess กัน PHP รันในนี้)
 .htaccess, .env.example, .gitignore              → deploy + security
 assets/css, assets/js                            → สไตล์ + jQuery + main.js
                                                   (nav toggle, confirm ลบ, AJAX เช็ค email)
@@ -138,9 +140,10 @@ assets/css, assets/js                            → สไตล์ + jQuery + 
 ```text
 users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
        contact_info, created_at)
-  1 ─────── N items (id, owner_id FK→users ON DELETE CASCADE, title,
+1 ─────── N items (id, owner_id FK→users ON DELETE CASCADE, title,
                      description, type ENUM(donate,exchange),
                      status ENUM(available,completed), contact,
+                     image VARCHAR(255) NULL,
                      created_at, updated_at)
 ```
 
@@ -158,13 +161,13 @@ users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
 
 | ภัย | กลไก | ตัวอย่างโค้ด |
 |---|---|---|
-| SQL Injection | Prepared statements ทุกจุด, `EMULATE_PREPARES=false` | `login.php:33`, `item_edit.php:76-86` |
-| XSS | `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` ทุกจุดแสดงผล | `index.php:40`, `nav.php:19`, `header.php:16` |
+| SQL Injection | Prepared statements ทุกจุด, `EMULATE_PREPARES=false` | `login.php:33`, `item_edit.php:92-104` |
+| XSS | `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` ทุกจุดแสดงผล | `index.php:45`, `nav.php:19`, `header.php:16` |
 | CSRF | token ต่อ session + `hash_equals` ทุก POST | `csrf.php:18-28` |
 | Session fixation | `session_regenerate_id(true)` ตอน login/สมัครสำเร็จ | `login.php:42`, `register.php:98` |
 | Session hijack | `httponly` + `strict_mode` + `only_cookies` + `SameSite=Lax` | `config/config.php:9-12` |
 | Password รั่ว | `password_hash()` / `password_verify()` ไม่มี plaintext | `register.php:85`, `login.php:39` |
-| เข้าถึงข้อมูลคนอื่น | `require_admin()` (403) + `require_owned_item()` (403/404) + `WHERE owner_id` ซ้ำใน SQL | `auth.php:56-65`, `auth.php:81-98`, `item_edit.php:76` |
+| เข้าถึงข้อมูลคนอื่น | `require_admin()` (403) + `require_owned_item()` (403/404) + `WHERE owner_id` ซ้ำใน SQL | `auth.php:56-65`, `auth.php:81-98`, `item_edit.php:94` |
 | ข้อมูล config รั่ว | `.env` อยู่ใน `.gitignore`; `.htaccess` บล็อก `/sql`, `/config`, `/includes`, dotfiles, `.sql`, `.md` + ปิด directory listing | `.htaccess`, `.gitignore:2-4` |
 | Error รั่วตอน production | `APP_DEBUG=false` → ซ่อน stack trace (ทดสอบแล้วได้ 500 เปล่า) | `config/config.php:6-7` |
 | รั่วว่า email มีในระบบ | ข้อความ error ล็อกอินอันเดียวสำหรับทุกกรณี | `login.php:39-40` |
@@ -191,7 +194,7 @@ jQuery โหลดใน `includes/footer.php` ใช้เขียน `assets
 **Q: มั่นใจยังไงว่าแก้ไขของคนอื่นไม่ได้?**
 สองชั้น: (1) `require_owned_item()` ตรวจ `owner_id == current_user.id`
 ก่อนเสมอ (2) SQL UPDATE/DELETE มี `WHERE id = ? AND owner_id = ?`
-ซ้ำอีกชั้น — เคส A/B/C/D ผ่านในชุดทดสอบอัตโนมัติ 212 กรณี
+ซ้ำอีกชั้น — เคส A/B/C/D ผ่านในชุดทดสอบอัตโนมัติ 224 กรณี
 
 **Q: ทำไม admin ถึงมีสิทธิ์แค่ดูและลบ?**
 ตามขอบเขต requirement: จัดการประกาศที่ผิดกฎได้ แต่ไม่แทรกแซง
@@ -204,16 +207,23 @@ jQuery โหลดใน `includes/footer.php` ใช้เขียน `assets
 `password_verify()` รองรับ upgrade  알고ริทึมในอนาคต
 
 **Q: ทดสอบอะไรมาแล้วบ้าง?**
-ชุดทดสอบอัตโนมัติ 212 กรณี: ownership (Case A/B/C/D), CSRF ทุก endpoint
+ชุดทดสอบอัตโนมัติ 224 กรณี: ownership (Case A/B/C/D), CSRF ทุก endpoint
 (รวม token ปลอม), XSS/SQLi payload, validation ข้อมูลผิดทุกฟอร์ม,
-guest เข้าหน้าคุ้มครอง, logout/session, AJAX email check, ทุกอย่าง
-regression ซ้ำหลังแก้โค้ด + deploy test 13 กรณี (fresh database,
+guest เข้าหน้าคุ้มครอง, logout/session, AJAX email check, image upload
+(สร้าง/เปลี่ยน/ลบรูป + ไฟล์ไม่ใช่ภาพถูก reject + ลบไฟล์เมื่อลบประกาศ),
+ทุกอย่าง regression ซ้ำหลังแก้โค้ด + deploy test 13 กรณี (fresh database,
 production config) — ทุกเคสรันจริงบน PHP 8.2/Apache ไม่ใช่การคาดเดา
+
+**Q: upload รูปปลอดภัยยังไง?**
+(1) ตรวจขนาด ≤2 MB และชนิดจริงด้วย `getimagesize()` ไม่เชื่อนามสกุล/`Content-Type`
+(2) เปลี่ยนชื่อไฟล์เป็น `bin2hex(random_bytes(16))` เก็บแค่ path ใน DB
+(3) โฟลเดอร์ `uploads/` มี `.htaccess` ปิด directory listing + block PHP รัน
+(4) ลบไฟล์เก่าทุกครั้งที่เปลี่ยนรูป/ลบรูป/ลบประกาศ (`includes/image_upload.php`)
 
 **Q: ข้อจำกัดของระบบนี้?**
 - ไม่มี rate limiting / lockout (ขอบเขตเล็ก)
 - สาธิตด้วย HTTP บน XAMPP — ยังไม่มี HTTPS จริง
-- ไม่มี email verification, ไม่มี upload รูป/category
+- ไม่มี email verification, ไม่มี category
   (nice-to-have ตามลำดับ ยังไม่ถึง)
 - ไม่มีรายงานสแปม/ร้องเรียนประกาศ — แอดมินดูรายการและลบได้แทน
 

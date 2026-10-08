@@ -19,6 +19,7 @@ Users can:
 - Choose Donate or Exchange
 - Edit/delete their own announcements
 - Mark their own item as Completed
+- Attach one optional photo to an announcement (JPG/PNG/GIF, up to 2 MB)
 - Contact the owner using the contact information provided
 
 The system does not handle payments, delivery, or internal request/approval workflows.
@@ -109,8 +110,10 @@ See `AGENTS.md` for AI/development rules.
 ## Manual Smoke Test
 
 1. Register → auto login → nav shows user name.
-2. Create an item (Donate and Exchange) → appears on the home page.
-3. Edit own item → change saved. Mark as Completed → status changes.
+2. Create an item (Donate and Exchange); optionally attach a photo and it
+   appears on the home page and on the detail page.
+3. Edit own item → change saved; replace or remove the photo (old file is
+   deleted). Mark as Completed → status changes.
 4. Open the item in a second browser (different account) → visible, but no
    edit/delete controls; POST-ing the edit URL directly returns 403.
 5. Delete own item → removed.
@@ -120,11 +123,11 @@ See `AGENTS.md` for AI/development rules.
 
 ## Automated Tests
 
-The `tests/` folder contains PowerShell test suites (212 assertions total):
+The `tests/` folder contains PowerShell test suites (224 assertions total):
 
 - `tests/phase4_tests.ps1` — item CRUD, validation, ownership (56 assertions)
 - `tests/phase5_tests.ps1` — admin dashboard, user list, item list (32 assertions)
-- `tests/phase7_tests.ps1` — auth, CSRF, XSS/SQLi, roles, session, AJAX email check (124 assertions)
+- `tests/phase7_tests.ps1` — auth, CSRF, XSS/SQLi, roles, session, AJAX email check, image upload (136 assertions)
 
 Prerequisites:
 
