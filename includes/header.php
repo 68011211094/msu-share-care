@@ -13,6 +13,8 @@ if (!function_exists('app_url')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#14532d">
+    <meta name="color-scheme" content="light">
     <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?> | MSU Share &amp; Care</title>
     <link rel="stylesheet" href="<?php echo app_url('assets/css/style.css'); ?>">
 </head>

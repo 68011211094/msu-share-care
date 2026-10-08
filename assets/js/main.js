@@ -7,6 +7,24 @@ jQuery(function ($) {
         $toggle.attr('aria-expanded', isOpen ? 'true' : 'false');
     });
 
+    var closeNav = function () {
+        $nav.removeClass('is-open');
+        $toggle.attr('aria-expanded', 'false');
+    };
+
+    $nav.on('click', 'a, button', function () {
+        if (window.matchMedia('(max-width: 720px)').matches) {
+            closeNav();
+        }
+    });
+
+    $(document).on('keydown', function (event) {
+        if (event.key === 'Escape' && $nav.hasClass('is-open')) {
+            closeNav();
+            $toggle.trigger('focus');
+        }
+    });
+
     $(document).on('submit', 'form[data-confirm]', function (event) {
         if (!window.confirm($(this).attr('data-confirm'))) {
             event.preventDefault();
