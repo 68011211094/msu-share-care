@@ -44,9 +44,18 @@ INSERT INTO items (owner_id, title, description, type, status, contact) VALUES
 1. **หน้าแรก (guest)** — เห็นประกาศตัวอย่าง 4 รายการ เมนูมีแค่
    สมัครสมาชิก / เข้าสู่ระบบ ยังไม่มีปุ่มแก้ไข/ลบ
    - คาดหวัง: แสดง badge Donate/Exchange และ Available ถูกต้อง
-2. **สมัครสมาชิก → กดปุ่มเปล่า ๆ** — ฟอร์มเปล่าหรืออีเมลผิดรูปแบบ
-   - คาดหวัง: ข้อความ validation ภาษาไทย (client-side กันเบื้องต้น
-     และ server-side ตรวจซ้ำ)
+2. **สมัครสมาชิก — สาธิต validation 3 ชั้น** (แยกย่อย ก–ค)
+   - **(ก) ฟอร์มเปล่า / อีเมลผิดรูปแบบ → กดปุ่มสมัครสมาชิก**
+     - คาดหวัง: บราวเซอร์เตือนทันที **ไม่ต้องรอ server**
+       (client-side: HTML5 `required` / `type=email` / `minlength`)
+   - **(ข) พิมพ์ `studenta@example.com` แล้วกดออกจากช่องอีเมล**
+     - คาดหวัง: ใต้ช่องขึ้น "อีเมลนี้ถูกใช้งานแล้ว" ทันที **โดยไม่กด submit**
+       (AJAX: jQuery `$.getJSON` → `check_email.php` → JSON) —
+       ลองเปลี่ยนเป็นเมลใหม่ เช่น `new.user@example.com` ขึ้น "อีเมลนี้ใช้ได้"
+   - **(ค) กรอกครบแต่รหัสผ่านยืนยันไม่ตรงกัน → กดสมัคร**
+     - คาดหวัง: server ปฏิเสธเป็นข้อความไทย ("รหัสผ่านยืนยันไม่ตรงกัน")
+       — บราวเซอร์เช็คเงื่อนไขนี้ไม่ได้ จึงพิสูจน์ว่า
+       **server-side validation ยังเป็นหลักเสมอ** แม้ปิด JavaScript
 3. **กรอกข้อมูลครบ → สมัครสมาชิก** (เช่น `test@example.com`)
    - คาดหวัง: เข้าสู่ระบบอัตโนมัติ เมนูขึ้น "สวัสดี, ..." (แสดงชื่อที่ escape แล้ว)
 4. **สร้างประกาศ (Donate)** — ตั้งชื่อ/รายละเอียด/ช่องทางติดต่อ
@@ -120,7 +129,8 @@ includes/  auth, csrf, validation, db_connect,
 config/    config.php (env+session), db.php      → ค่าตั้งค่า + โหลด .env
 sql/schema.sql                                   → โครงสร้างฐานข้อมูล
 .htaccess, .env.example, .gitignore              → deploy + security
-assets/css, assets/js                            → สไตล์ + nav toggle + confirm ลบ
+assets/css, assets/js                            → สไตล์ + jQuery + main.js
+                                                  (nav toggle, confirm ลบ, AJAX เช็ค email)
 ```
 
 ฐานข้อมูล 2 ตาราง:
@@ -166,6 +176,14 @@ users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
 เว็บแอปเดียวกัน origin เดียว session ฝั่ง server ควบคุมได้ครบ
 (logout = ทำลายทันที, regenerate id ได้) ไม่ต้องเก็บ token ไว้ใน client
 
+**Q: jQuery / AJAX ใช้ตรงไหน?**
+jQuery โหลดใน `includes/footer.php` ใช้เขียน `assets/js/main.js`
+(nav toggle, confirm ก่อนลบ, และ AJAX) — AJAX ใช้ตอนสมัครสมาชิก:
+ออกจากช่องอีเมล → `$.getJSON('check_email.php', {email: ...})`
+ตรวจอีเมลซ้ำแบบไม่ reload หน้า คืน JSON `{valid, available}` —
+**server-side ยังตรวจซ้ำตอน submit เสมอ** ถ้าปิด JavaScript
+การสมัครยังถูก validate ครบและ reject email ซ้ำเหมือนเดิม
+
 **Q: CSRF token เก็บตรงไหน?**
 `$_SESSION['csrf_token']` ฝั่ง server ฝั่ง client ได้ค่าจากฟอร์มกลับมาตอน POST
 แล้วเทียบด้วย `hash_equals` — token จึงเดาไม่ได้และใช้ซ้ำข้ามคนไม่ได้
@@ -173,7 +191,7 @@ users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
 **Q: มั่นใจยังไงว่าแก้ไขของคนอื่นไม่ได้?**
 สองชั้น: (1) `require_owned_item()` ตรวจ `owner_id == current_user.id`
 ก่อนเสมอ (2) SQL UPDATE/DELETE มี `WHERE id = ? AND owner_id = ?`
-ซ้ำอีกชั้น — เคส A/B/C/D ผ่านในชุดทดสอบอัตโนมัติ 206 กรณี
+ซ้ำอีกชั้น — เคส A/B/C/D ผ่านในชุดทดสอบอัตโนมัติ 212 กรณี
 
 **Q: ทำไม admin ถึงมีสิทธิ์แค่ดูและลบ?**
 ตามขอบเขต requirement: จัดการประกาศที่ผิดกฎได้ แต่ไม่แทรกแซง
@@ -186,11 +204,11 @@ users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
 `password_verify()` รองรับ upgrade  알고ริทึมในอนาคต
 
 **Q: ทดสอบอะไรมาแล้วบ้าง?**
-ชุดทดสอบอัตโนมัติ 206 กรณี: ownership (Case A/B/C/D), CSRF ทุก endpoint
+ชุดทดสอบอัตโนมัติ 212 กรณี: ownership (Case A/B/C/D), CSRF ทุก endpoint
 (รวม token ปลอม), XSS/SQLi payload, validation ข้อมูลผิดทุกฟอร์ม,
-guest เข้าหน้าคุ้มครอง, logout/session, ทุกอย่าง regression ซ้ำหลังแก้โค้ด
-+ deploy test 13 กรณี (fresh database, production config) — ทุกเคส
-รันจริงบน PHP 8.2/Apache ไม่ใช่การคาดเดา
+guest เข้าหน้าคุ้มครอง, logout/session, AJAX email check, ทุกอย่าง
+regression ซ้ำหลังแก้โค้ด + deploy test 13 กรณี (fresh database,
+production config) — ทุกเคสรันจริงบน PHP 8.2/Apache ไม่ใช่การคาดเดา
 
 **Q: ข้อจำกัดของระบบนี้?**
 - ไม่มี rate limiting / lockout (ขอบเขตเล็ก)

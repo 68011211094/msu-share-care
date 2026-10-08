@@ -118,11 +118,11 @@ See `AGENTS.md` for AI/development rules.
 
 ## Automated Tests
 
-The `tests/` folder contains PowerShell test suites (206 assertions total):
+The `tests/` folder contains PowerShell test suites (212 assertions total):
 
 - `tests/phase4_tests.ps1` — item CRUD, validation, ownership (56 assertions)
 - `tests/phase5_tests.ps1` — admin dashboard, user list, item list (32 assertions)
-- `tests/phase7_tests.ps1` — auth, CSRF, XSS/SQLi, roles, session (118 assertions)
+- `tests/phase7_tests.ps1` — auth, CSRF, XSS/SQLi, roles, session, AJAX email check (124 assertions)
 
 Prerequisites:
 
