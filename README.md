@@ -103,6 +103,8 @@ See `AGENTS.md` for AI/development rules.
   or from a subdirectory (all links are relative).
 - `mod_rewrite` must be enabled for `.htaccess` rules to apply.
 - Keep `APP_DEBUG=false` and the database credentials private in production.
+- For a step-by-step free hosting guide (InfinityFree and alternatives), see
+  `DEPLOY.md`.
 
 ## Manual Smoke Test
 
