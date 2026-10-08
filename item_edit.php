@@ -4,6 +4,7 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/validation.php';
+require_once __DIR__ . '/includes/image_upload.php';
 
 require_login();
 
@@ -71,9 +72,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = $error;
     }
 
+    $oldImage = null;
+
     if (empty($errors)) {
+        $newUpload = handle_image_upload($errors);
+    }
+
+    if (empty($errors)) {
+        $imagePath = $item['image'];
+
+        if ($newUpload !== null) {
+            $oldImage = $item['image'];
+            $imagePath = $newUpload;
+        } elseif (isset($_POST['remove_image']) && $item['image'] !== null) {
+            $oldImage = $item['image'];
+            $imagePath = null;
+        }
+
         $statement = db_connect()->prepare(
-            'UPDATE items SET title = ?, description = ?, type = ?, contact = ?'
+            'UPDATE items SET title = ?, description = ?, type = ?, contact = ?, image = ?'
             . ' WHERE id = ? AND owner_id = ?'
         );
         $statement->execute([
@@ -81,9 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $oldValues['description'],
             $oldValues['type'],
             $oldValues['contact'],
+            $imagePath,
             $itemId,
             $currentUser['id'],
         ]);
+
+        if ($oldImage !== null) {
+            delete_uploaded_image($oldImage);
+        }
 
         header('Location: item_detail.php?id=' . $itemId);
         exit;
@@ -103,7 +125,8 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="item_edit.php?id=<?php echo $itemId; ?>">
+        <form method="post" action="item_edit.php?id=<?php echo $itemId; ?>"
+              enctype="multipart/form-data">
             <?php echo csrf_field(); ?>
 
             <label for="title">ชื่อสิ่งของ *</label>
@@ -129,6 +152,20 @@ require __DIR__ . '/includes/header.php';
             <label for="contact">ช่องทางติดต่อ *</label>
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
+
+            <label for="image">รูปภาพ (ไม่บังคับ — ขนาดไม่เกิน 2 MB, รองรับ JPG/PNG/GIF)</label>
+            <?php if (!empty($item['image'])) { ?>
+                <p>
+                    <img class="detail-image" src="<?php echo htmlspecialchars(app_url($item['image']), ENT_QUOTES, 'UTF-8'); ?>"
+                         alt="รูปภาพปัจจุบัน">
+                </p>
+            <?php } ?>
+            <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+            <?php if (!empty($item['image'])) { ?>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="remove_image" value="1"> ลบรูปภาพนี้
+                </label>
+            <?php } ?>
 
             <div class="form-actions">
                 <button type="submit" class="btn">บันทึกการแก้ไข</button>

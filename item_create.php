@@ -4,6 +4,7 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/validation.php';
+require_once __DIR__ . '/includes/image_upload.php';
 
 require_login();
 
@@ -64,8 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
+        $imagePath = handle_image_upload($errors);
+    }
+
+    if (empty($errors)) {
         $statement = db_connect()->prepare(
-            'INSERT INTO items (owner_id, title, description, type, contact) VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO items (owner_id, title, description, type, contact, image) VALUES (?, ?, ?, ?, ?, ?)'
         );
         $statement->execute([
             $currentUser['id'],
@@ -73,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $oldValues['description'],
             $oldValues['type'],
             $oldValues['contact'],
+            $imagePath,
         ]);
 
         $newItemId = (int) db_connect()->lastInsertId();
@@ -95,7 +101,7 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="item_create.php">
+        <form method="post" action="item_create.php" enctype="multipart/form-data">
             <?php echo csrf_field(); ?>
 
             <label for="title">ชื่อสิ่งของ *</label>
@@ -121,6 +127,9 @@ require __DIR__ . '/includes/header.php';
             <label for="contact">ช่องทางติดต่อ * (เช่น เบอร์โทร หรือ Line)</label>
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
+
+            <label for="image">รูปภาพ (ไม่บังคับ — ขนาดไม่เกิน 2 MB, รองรับ JPG/PNG/GIF)</label>
+            <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
 
             <div class="form-actions">
                 <button type="submit" class="btn">ประกาศ</button>

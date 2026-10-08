@@ -16,6 +16,7 @@ CREATE TABLE items (
     type ENUM('donate', 'exchange') NOT NULL,
     status ENUM('available', 'completed') NOT NULL DEFAULT 'available',
     contact VARCHAR(150) NOT NULL,
+    image VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,

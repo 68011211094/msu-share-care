@@ -3,6 +3,7 @@
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
+require_once __DIR__ . '/includes/image_upload.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: my_items.php');
@@ -30,6 +31,8 @@ $statement = db_connect()->prepare(
     'DELETE FROM items WHERE id = ? AND owner_id = ?'
 );
 $statement->execute([$itemId, $currentUser['id']]);
+
+delete_uploaded_image($item['image']);
 
 header('Location: my_items.php');
 exit;

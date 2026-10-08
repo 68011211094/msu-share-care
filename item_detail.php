@@ -41,6 +41,13 @@ require __DIR__ . '/includes/header.php';
     </div>
 
     <div class="detail-box">
+        <?php if (!empty($item['image'])) { ?>
+            <div class="detail-image">
+                <img src="<?php echo htmlspecialchars(app_url($item['image']), ENT_QUOTES, 'UTF-8'); ?>"
+                     alt="<?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>">
+            </div>
+        <?php } ?>
+
         <h1><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
 
         <p class="item-meta">

@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/db_connect.php';
 $pageTitle = 'หน้าแรก';
 
 $statement = db_connect()->query(
-    'SELECT items.id, items.title, items.type, items.status, items.created_at,'
+    'SELECT items.id, items.title, items.type, items.status, items.created_at, items.image,'
     . ' users.full_name AS owner_name'
     . ' FROM items'
     . ' INNER JOIN users ON users.id = items.owner_id'
@@ -28,6 +28,11 @@ require __DIR__ . '/includes/header.php';
         <div class="item-list">
             <?php foreach ($items as $item) { ?>
                 <div class="item-card">
+                    <?php if (!empty($item['image'])) { ?>
+                        <a class="item-thumb" href="item_detail.php?id=<?php echo (int) $item['id']; ?>">
+                            <img src="<?php echo htmlspecialchars($item['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="">
+                        </a>
+                    <?php } ?>
                     <div class="item-badges">
                         <span class="badge <?php echo $item['type'] === 'donate' ? 'badge-donate' : 'badge-exchange'; ?>">
                             <?php echo $item['type'] === 'donate' ? 'Donate' : 'Exchange'; ?>

@@ -11,7 +11,7 @@ $currentUser = current_user();
 $pageTitle = 'ประกาศของฉัน';
 
 $statement = db_connect()->prepare(
-    'SELECT id, title, type, status, created_at FROM items WHERE owner_id = ?'
+    'SELECT id, title, type, status, created_at, image FROM items WHERE owner_id = ?'
     . ' ORDER BY created_at DESC, id DESC'
 );
 $statement->execute([$currentUser['id']]);
@@ -34,6 +34,11 @@ require __DIR__ . '/includes/header.php';
         <div class="item-list">
             <?php foreach ($items as $item) { ?>
                 <div class="item-card">
+                    <?php if (!empty($item['image'])) { ?>
+                        <a class="item-thumb" href="item_detail.php?id=<?php echo (int) $item['id']; ?>">
+                            <img src="<?php echo htmlspecialchars($item['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="">
+                        </a>
+                    <?php } ?>
                     <div class="item-badges">
                         <span class="badge <?php echo $item['type'] === 'donate' ? 'badge-donate' : 'badge-exchange'; ?>">
                             <?php echo $item['type'] === 'donate' ? 'Donate' : 'Exchange'; ?>
