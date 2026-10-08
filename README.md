@@ -115,3 +115,29 @@ See `AGENTS.md` for AI/development rules.
 6. Log in as admin → dashboard stats, user list, item list; admin delete works.
 7. Log out → session ends (revisiting my page redirects to login).
 8. Visit `/.env`, `/sql/schema.sql`, `/config/`, `/includes/` → 403.
+
+## Automated Tests
+
+The `tests/` folder contains PowerShell test suites (206 assertions total):
+
+- `tests/phase4_tests.ps1` — item CRUD, validation, ownership (56 assertions)
+- `tests/phase5_tests.ps1` — admin dashboard, user list, item list (32 assertions)
+- `tests/phase7_tests.ps1` — auth, CSRF, XSS/SQLi, roles, session (118 assertions)
+
+Prerequisites:
+
+- The app is served at `http://127.0.0.1:8080` (change `$base` at the top of
+  the script if your URL differs, e.g. `http://localhost/msu-share-care`).
+- MySQL CLI is at `C:\xampp\mysql\bin\mysql.exe` (change `$mysql` if needed).
+- Windows PowerShell.
+
+Run from the project folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tests\phase7_tests.ps1
+```
+
+**Warning:** every suite resets the database first (deletes all users and
+items) so its results are independent. After running the tests, restore demo
+data with the seed SQL in `PRESENTATION.md` or by re-importing
+`sql/schema.sql`.
