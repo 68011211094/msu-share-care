@@ -1,0 +1,15 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(sql|config|includes)(/|$) - [F,L]
+    RewriteRule ^\.git(/|$) - [F,L]
+</IfModule>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(sql|md)$">
+    Require all denied
+</FilesMatch>
