@@ -38,10 +38,17 @@ function is_logged_in()
     return current_user() !== null;
 }
 
+function app_url($path)
+{
+    $base = isset($GLOBALS['basePath']) ? $GLOBALS['basePath'] : '';
+
+    return $base . $path;
+}
+
 function require_login()
 {
     if (!is_logged_in()) {
-        header('Location: login.php');
+        header('Location: ' . app_url('login.php'));
         exit;
     }
 }
