@@ -53,7 +53,39 @@ function require_admin()
     $user = current_user();
 
     if ($user['role'] !== 'admin') {
-        http_response_code(403);
-        die('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+        show_error_page(403, 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
     }
+}
+
+function show_error_page($httpCode, $title, $message)
+{
+    http_response_code($httpCode);
+    $pageTitle = $title;
+
+    require __DIR__ . '/header.php';
+    echo '    <h1>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</h1>\n";
+    echo '    <div class="page-note">'
+        . htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
+        . "</div>\n";
+    require __DIR__ . '/footer.php';
+    exit;
+}
+
+function require_owned_item($itemId)
+{
+    $statement = db_connect()->prepare('SELECT * FROM items WHERE id = ?');
+    $statement->execute([$itemId]);
+    $item = $statement->fetch();
+
+    if ($item === false) {
+        show_error_page(404, 'ไม่พบประกาศ', 'ประกาศนี้อาจถูกลบไปแล้ว');
+    }
+
+    $currentUser = current_user();
+
+    if ((int) $item['owner_id'] !== (int) $currentUser['id']) {
+        show_error_page(403, 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์แก้ไขประกาศนี้');
+    }
+
+    return $item;
 }

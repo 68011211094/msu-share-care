@@ -9,14 +9,22 @@ require_login();
 
 $currentUser = current_user();
 
-$pageTitle = 'สร้างประกาศ';
+$itemId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+
+if ($itemId <= 0) {
+    show_error_page(404, 'ไม่พบประกาศ', 'ประกาศนี้อาจถูกลบไปแล้ว');
+}
+
+$item = require_owned_item($itemId);
+
+$pageTitle = 'แก้ไขประกาศ';
 
 $errors = [];
 $oldValues = [
-    'title' => '',
-    'description' => '',
-    'type' => 'donate',
-    'contact' => $currentUser['contact_info'] !== null ? $currentUser['contact_info'] : '',
+    'title' => $item['title'],
+    'description' => $item['description'],
+    'type' => $item['type'],
+    'contact' => $item['contact'],
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -65,26 +73,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         $statement = db_connect()->prepare(
-            'INSERT INTO items (owner_id, title, description, type, contact) VALUES (?, ?, ?, ?, ?)'
+            'UPDATE items SET title = ?, description = ?, type = ?, contact = ?'
+            . ' WHERE id = ? AND owner_id = ?'
         );
         $statement->execute([
-            $currentUser['id'],
             $oldValues['title'],
             $oldValues['description'],
             $oldValues['type'],
             $oldValues['contact'],
+            $itemId,
+            $currentUser['id'],
         ]);
 
-        $newItemId = (int) db_connect()->lastInsertId();
-
-        header('Location: item_detail.php?id=' . $newItemId);
+        header('Location: item_detail.php?id=' . $itemId);
         exit;
     }
 }
 
 require __DIR__ . '/includes/header.php';
 ?>
-    <h1>สร้างประกาศ</h1>
+    <h1>แก้ไขประกาศ</h1>
 
     <div class="form-box">
         <?php if (!empty($errors)) { ?>
@@ -95,7 +103,7 @@ require __DIR__ . '/includes/header.php';
             </div>
         <?php } ?>
 
-        <form method="post" action="item_create.php" novalidate>
+        <form method="post" action="item_edit.php?id=<?php echo $itemId; ?>" novalidate>
             <?php echo csrf_field(); ?>
 
             <label for="title">ชื่อสิ่งของ *</label>
@@ -118,12 +126,13 @@ require __DIR__ . '/includes/header.php';
             <textarea id="description" name="description" maxlength="5000" required
                       ><?php echo htmlspecialchars($oldValues['description'], ENT_QUOTES, 'UTF-8'); ?></textarea>
 
-            <label for="contact">ช่องทางติดต่อ * (เช่น เบอร์โทร หรือ Line)</label>
+            <label for="contact">ช่องทางติดต่อ *</label>
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
 
             <div class="form-actions">
-                <button type="submit" class="btn">ประกาศ</button>
+                <button type="submit" class="btn">บันทึกการแก้ไข</button>
+                <a class="btn btn-secondary" href="item_detail.php?id=<?php echo $itemId; ?>">ยกเลิก</a>
             </div>
         </form>
     </div>
