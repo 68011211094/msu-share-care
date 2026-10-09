@@ -41,6 +41,10 @@ require __DIR__ . '/../includes/header.php';
     <h1>จัดการประกาศ</h1>
     <p>ประกาศทั้งหมด <?php echo count($items); ?> รายการ</p>
 
+    <div class="admin-links">
+        <a class="btn btn-secondary" href="<?php echo app_url('item_create.php'); ?>">เพิ่มประกาศ</a>
+    </div>
+
     <?php if (empty($items)) { ?>
         <div class="empty-state">
             <p><strong>ยังไม่มีประกาศ</strong></p>
@@ -81,6 +85,8 @@ require __DIR__ . '/../includes/header.php';
                             </td>
                             <td><?php echo date('d/m/Y', strtotime($item['created_at'])); ?></td>
                             <td>
+                                <a class="btn btn-secondary btn-small"
+                                   href="<?php echo app_url('item_edit.php?id=' . (int) $item['id']); ?>">แก้ไข</a>
                                 <form class="inline-form" method="post" action="items.php"
                                       data-confirm="ต้องการลบประกาศนี้จริงหรือไม่?">
                                     <?php echo csrf_field(); ?>

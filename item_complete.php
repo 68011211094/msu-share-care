@@ -26,10 +26,17 @@ if ($itemId <= 0) {
 
 $item = require_owned_item($itemId);
 
-$statement = db_connect()->prepare(
-    "UPDATE items SET status = 'completed' WHERE id = ? AND owner_id = ? AND status = 'available'"
-);
-$statement->execute([$itemId, $currentUser['id']]);
+if ($currentUser['role'] === 'admin') {
+    $statement = db_connect()->prepare(
+        "UPDATE items SET status = 'completed' WHERE id = ? AND status = 'available'"
+    );
+    $statement->execute([$itemId]);
+} else {
+    $statement = db_connect()->prepare(
+        "UPDATE items SET status = 'completed' WHERE id = ? AND owner_id = ? AND status = 'available'"
+    );
+    $statement->execute([$itemId, $currentUser['id']]);
+}
 
-header('Location: item_detail.php?id=' . $itemId);
+header('Location: ' . ($currentUser['role'] === 'admin' ? app_url('admin/items.php') : 'item_detail.php?id=' . $itemId));
 exit;

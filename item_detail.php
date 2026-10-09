@@ -26,6 +26,8 @@ if ($item === false) {
 $currentUser = current_user();
 $isOwner = $currentUser !== null
     && (int) $item['owner_id'] === (int) $currentUser['id'];
+$isAdmin = $currentUser !== null && $currentUser['role'] === 'admin';
+$canManage = $isOwner || $isAdmin;
 
 $pageTitle = $item['title'];
 
@@ -62,7 +64,7 @@ require __DIR__ . '/includes/header.php';
         <h2>ช่องทางติดต่อ</h2>
         <p class="item-contact"><?php echo htmlspecialchars($item['contact'], ENT_QUOTES, 'UTF-8'); ?></p>
 
-        <?php if ($isOwner) { ?>
+        <?php if ($canManage) { ?>
             <div class="detail-actions">
                 <a class="btn btn-secondary" href="item_edit.php?id=<?php echo $itemId; ?>">แก้ไข</a>
 

@@ -27,12 +27,15 @@ if ($itemId <= 0) {
 
 $item = require_owned_item($itemId);
 
-$statement = db_connect()->prepare(
-    'DELETE FROM items WHERE id = ? AND owner_id = ?'
-);
-$statement->execute([$itemId, $currentUser['id']]);
+if ($currentUser['role'] === 'admin') {
+    $statement = db_connect()->prepare('DELETE FROM items WHERE id = ?');
+    $statement->execute([$itemId]);
+} else {
+    $statement = db_connect()->prepare('DELETE FROM items WHERE id = ? AND owner_id = ?');
+    $statement->execute([$itemId, $currentUser['id']]);
+}
 
 delete_uploaded_image($item['image']);
 
-header('Location: my_items.php');
+header('Location: ' . ($currentUser['role'] === 'admin' ? app_url('admin/items.php') : app_url('my_items.php')));
 exit;

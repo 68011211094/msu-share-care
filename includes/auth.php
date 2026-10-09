@@ -90,6 +90,10 @@ function require_owned_item($itemId)
 
     $currentUser = current_user();
 
+    if ($currentUser['role'] === 'admin') {
+        return $item;
+    }
+
     if ((int) $item['owner_id'] !== (int) $currentUser['id']) {
         show_error_page(403, 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์แก้ไขประกาศนี้');
     }

@@ -89,19 +89,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $imagePath = null;
         }
 
-        $statement = db_connect()->prepare(
-            'UPDATE items SET title = ?, description = ?, type = ?, contact = ?, image = ?'
-            . ' WHERE id = ? AND owner_id = ?'
-        );
-        $statement->execute([
-            $oldValues['title'],
-            $oldValues['description'],
-            $oldValues['type'],
-            $oldValues['contact'],
-            $imagePath,
-            $itemId,
-            $currentUser['id'],
-        ]);
+        if ($currentUser['role'] === 'admin') {
+            $statement = db_connect()->prepare(
+                'UPDATE items SET title = ?, description = ?, type = ?, contact = ?, image = ?'
+                . ' WHERE id = ?'
+            );
+            $statement->execute([
+                $oldValues['title'],
+                $oldValues['description'],
+                $oldValues['type'],
+                $oldValues['contact'],
+                $imagePath,
+                $itemId,
+            ]);
+        } else {
+            $statement = db_connect()->prepare(
+                'UPDATE items SET title = ?, description = ?, type = ?, contact = ?, image = ?'
+                . ' WHERE id = ? AND owner_id = ?'
+            );
+            $statement->execute([
+                $oldValues['title'],
+                $oldValues['description'],
+                $oldValues['type'],
+                $oldValues['contact'],
+                $imagePath,
+                $itemId,
+                $currentUser['id'],
+            ]);
+        }
 
         if ($oldImage !== null) {
             delete_uploaded_image($oldImage);
