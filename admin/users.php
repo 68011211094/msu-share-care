@@ -22,6 +22,10 @@ require __DIR__ . '/../includes/header.php';
     <h1>จัดการผู้ใช้</h1>
     <p>ผู้ใช้ทั้งหมด <?php echo count($users); ?> คน</p>
 
+    <div class="admin-links">
+        <a class="btn btn-secondary" href="<?php echo app_url('admin/user_create.php'); ?>">เพิ่มผู้ใช้</a>
+    </div>
+
     <div class="table-wrap">
         <table class="data-table">
             <thead>
@@ -32,6 +36,7 @@ require __DIR__ . '/../includes/header.php';
                     <th>บทบาท</th>
                     <th>ประกาศ</th>
                     <th>สมัครเมื่อ</th>
+                    <th>จัดการ</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,6 +52,15 @@ require __DIR__ . '/../includes/header.php';
                         </td>
                         <td><?php echo (int) $user['item_count']; ?></td>
                         <td><?php echo date('d/m/Y', strtotime($user['created_at'])); ?></td>
+                        <td>
+                            <a class="btn btn-secondary btn-small" href="user_edit.php?id=<?php echo (int) $user['id']; ?>">แก้ไข</a>
+                            <form class="inline-form" method="post" action="user_delete.php"
+                                  data-confirm="ต้องการลบผู้ใช้ <?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?> และประกาศทั้งหมดของเขาจริงหรือไม่?">
+                                <?php echo csrf_field(); ?>
+                                <input type="hidden" name="delete_id" value="<?php echo (int) $user['id']; ?>">
+                                <button type="submit" class="btn btn-danger btn-small">ลบ</button>
+                            </form>
+                        </td>
                     </tr>
                 <?php } ?>
             </tbody>
