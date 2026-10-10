@@ -62,10 +62,11 @@ MSU Share & Care เป็นเว็บแอปพลิเคชันแบ
 | ฟีเจอร์ | รายละเอียด |
 |---|---|
 | Dashboard | ดูสถิติ: ผู้ใช้ทั้งหมด, ประกาศทั้งหมด, Available, Completed, Donate, Exchange |
-| จัดการผู้ใช้ | ดูรายชื่อผู้ใช้ จำนวนประกาศแต่ละคน บทบาท |
-| จัดการประกาศ | ดูประกาศทั้งหมด และลบประกาศที่ไม่เหมาะสมได้ |
+| จัดการผู้ใช้ | ดูรายชื่อ, เพิ่ม, แก้ไข (ชื่อ/อีเมล/บทบาท/ติดต่อ/รหัสผ่านใหม่), ลบผู้ใช้ |
+| จัดการประกาศ | ดูประกาศทั้งหมด, เพิ่ม, แก้ไข, ทำเครื่องหมาย Completed และลบประกาศได้ |
 
-> **หมายเหตุ:** แอดมินทำได้แค่ "ดู + ลบ" เท่านั้น ไม่สามารถแก้ไขประกาศของคนอื่นได้
+> **หมายเหตุ:** แอดมินจัดการประกาศของใครก็ได้ แต่มีข้อจำกัดด้านความปลอดภัย:
+> ลบหรือลดสิทธิ์ตัวเองไม่ได้ และต้องมีแอดมินเหลืออย่างน้อย 1 คนเสมอ
 
 ---
 
@@ -98,10 +99,12 @@ msu-share-care/
 ├── check_email.php         # AJAX endpoint ตรวจอีเมลซ้ำ (คืน JSON)
 ├── admin/
 │   ├── dashboard.php       # หน้าแอดมิน (สถิติ)
-│   ├── users.php           # จัดการผู้ใช้ (ดู)
-│   └── items.php           # จัดการประกาศ (ดู/ลบ)
+│   ├── users.php           # จัดการผู้ใช้ (รายชื่อ + ปุ่มแก้ไข/ลบ + เพิ่มผู้ใช้)
+│   ├── user_create.php     # เพิ่มผู้ใช้
+│   ├── user_edit.php       # แก้ไขผู้ใช้
+│   ├── user_delete.php     # ลบผู้ใช้ (+ ประกาศและรูปทั้งหมดของผู้นั้น)
+│   └── items.php           # จัดการประกาศทั้งหมด (เพิ่ม/แก้ไข/ลบ)
 ├── includes/               # โค้ดที่ใช้ร่วมกัน (ทุกหน้า require ไฟล์เหล่านี้)
-│   ├── config.php          # โหลดค่า .env + path ต่าง ๆ
 │   ├── db_connect.php      # เชื่อมต่อฐานข้อมูล (PDO + prepared statements)
 │   ├── auth.php            # require_login / require_admin / require_owned_item
 │   ├── csrf.php            # สร้าง + ตรวจ CSRF token
@@ -110,10 +113,13 @@ msu-share-care/
 │   ├── header.php          # เปิด HTML + โหลด CSS
 │   ├── nav.php             # แถบเมนูบนสุด
 │   └── footer.php          # ปิด HTML + โหลด jQuery
-├── config/                 # ตั้งค่า session + โหลดค่า .env (config.php, db.php)
+├── config/                 # ตั้งค่า session + โหลดค่า .env
+│   ├── config.php          # เปิด session + ตั้งค่า security (require db.php)
+│   └── db.php              # อ่านค่า .env (env_value) + get_db_config()
 ├── sql/schema.sql          # สคริปต์สร้างตารางฐานข้อมูล
 ├── assets/
 │   ├── css/style.css       # สไตล์ทั้งหมด
+│   ├── favicon.svg         # โลโก้บนแท็บเบราว์เซอร์
 │   └── js/
 │       ├── jquery-3.7.1.min.js
 │       └── main.js         # เมนูมือถือ / confirm / พรีวิวรูป / AJAX
@@ -222,7 +228,7 @@ UPDATE users SET role = 'admin' WHERE email = 'อีเมลของคุณ
 | เข้าสู่ระบบ | `login.php` | ทุกคน |
 | ประกาศของฉัน | `my_items.php` | สมาชิก |
 | สร้างประกาศ | `item_create.php` | สมาชิก |
-| แก้ไข/ลบประกาศ | `item_edit.php?id=..` / `item_delete.php` | **เจ้าของประกาศเท่านั้น** (ไม่ใช่เจ้าของ → 403) |
+| แก้ไข/ลบประกาศ | `item_edit.php?id=..` / `item_delete.php` | **เจ้าของ หรือแอดมิน** (คนอื่น → 403) |
 | ดูรายละเอียด | `item_detail.php?id=..` | ทุกคน |
 | Admin Dashboard | `admin/dashboard.php` | แอดมินเท่านั้น (ไม่ใช่แอดมิน → 403) |
 
@@ -288,11 +294,11 @@ UPDATE users SET role = 'admin' WHERE email = 'อีเมลของคุณ
 
 ## 13. การทดสอบอัตโนมัติ
 
-ในโฟลเดอร์ `tests/` มีชุดทดสอบ PowerShell รวม **224 assertions**:
+ในโฟลเดอร์ `tests/` มีชุดทดสอบ PowerShell รวม **223 assertions**:
 
 | ชุดทดสอบ | ครอบคลุมอะไร | จำนวน |
 |---|---|---|
-| `tests/phase4_tests.ps1` | item CRUD, validation, ownership (Case A/B/C/D) | 56 |
+| `tests/phase4_tests.ps1` | item CRUD, validation, ownership (Case A/B/C/D) | 55 |
 | `tests/phase5_tests.ps1` | admin dashboard, user list, item list | 32 |
 | `tests/phase7_tests.ps1` | auth, CSRF, XSS/SQLi, roles, session, AJAX email check, image upload | 136 |
 

@@ -84,10 +84,12 @@ INSERT INTO items (owner_id, title, description, type, status, contact) VALUES
 12. **รายการผู้ใช้** — เห็น 2 บัญชี มี badge Admin/User
 13. **รายการประกาศ → ลบ item ใดก็ได้**
     - คาดหวัง: รายการหายทันที (คำขอมี CSRF token + บันทึกผ่าน POST เท่านั้น)
-14. **(เสริม)** ยัง login เป็น admin → พิมพ์ `item_edit.php?id=2`
-    (ประกาศที่ admin ไม่ได้เป็นเจ้าของ)
-    - คาดหวัง: **403** — ตามขอบเขตที่กำหนด: admin ดู+ลบได้เท่านั้น
-      ไม่แก้ไขเนื้อหาของผู้ใช้
+14. **(เสริม)** ยัง login เป็น admin → เปิดประกาศของ studentb แล้วกด **แก้ไข**
+    (หรือพิมพ์ `item_edit.php?id=2` ตรง ๆ)
+    - คาดหวัง: **เข้าแก้ไขได้** — admin จัดการประกาศของผู้อื่นได้
+      (แก้ไข / ทำเครื่องหมาย Completed / ลบ) ตามสิทธิ์ที่ระบบกำหนด
+    - ต่างจาก user ทั่วไป: ถ้าเป็น studentb เปิด `item_edit.php` ของคนอื่น
+      จะได้ **403** (ดูบทที่ 1 ข้อ 8)
 
 ### บทที่ 3 — Security
 
@@ -162,12 +164,12 @@ users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
 | ภัย | กลไก | ตัวอย่างโค้ด |
 |---|---|---|
 | SQL Injection | Prepared statements ทุกจุด, `EMULATE_PREPARES=false` | `login.php:33`, `item_edit.php:92-104` |
-| XSS | `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` ทุกจุดแสดงผล | `index.php:45`, `nav.php:19`, `header.php:16` |
+| XSS | `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` ทุกจุดแสดงผล | `index.php:45`, `nav.php:19`, `header.php:18` |
 | CSRF | token ต่อ session + `hash_equals` ทุก POST | `csrf.php:18-28` |
 | Session fixation | `session_regenerate_id(true)` ตอน login/สมัครสำเร็จ | `login.php:42`, `register.php:98` |
 | Session hijack | `httponly` + `strict_mode` + `only_cookies` + `SameSite=Lax` | `config/config.php:9-12` |
 | Password รั่ว | `password_hash()` / `password_verify()` ไม่มี plaintext | `register.php:85`, `login.php:39` |
-| เข้าถึงข้อมูลคนอื่น | `require_admin()` (403) + `require_owned_item()` (403/404) + `WHERE owner_id` ซ้ำใน SQL | `auth.php:56-65`, `auth.php:81-98`, `item_edit.php:94` |
+| เข้าถึงข้อมูลคนอื่น | `require_admin()` (403) + `require_owned_item()` (403/404) + `WHERE owner_id` ซ้ำใน SQL | `auth.php:56-65`, `auth.php:81-98`, `item_edit.php:106-108` |
 | ข้อมูล config รั่ว | `.env` อยู่ใน `.gitignore`; `.htaccess` บล็อก `/sql`, `/config`, `/includes`, dotfiles, `.sql`, `.md` + ปิด directory listing | `.htaccess`, `.gitignore:2-4` |
 | Error รั่วตอน production | `APP_DEBUG=false` → ซ่อน stack trace (ทดสอบแล้วได้ 500 เปล่า) | `config/config.php:6-7` |
 | รั่วว่า email มีในระบบ | ข้อความ error ล็อกอินอันเดียวสำหรับทุกกรณี | `login.php:39-40` |
@@ -194,12 +196,14 @@ jQuery โหลดใน `includes/footer.php` ใช้เขียน `assets
 **Q: มั่นใจยังไงว่าแก้ไขของคนอื่นไม่ได้?**
 สองชั้น: (1) `require_owned_item()` ตรวจ `owner_id == current_user.id`
 ก่อนเสมอ (2) SQL UPDATE/DELETE มี `WHERE id = ? AND owner_id = ?`
-ซ้ำอีกชั้น — เคส A/B/C/D ผ่านในชุดทดสอบอัตโนมัติ 224 กรณี
+ซ้ำอีกชั้น — เคส A/B/C/D ผ่านในชุดทดสอบอัตโนมัติ 223 กรณี
 
-**Q: ทำไม admin ถึงมีสิทธิ์แค่ดูและลบ?**
-ตามขอบเขต requirement: จัดการประกาศที่ผิดกฎได้ แต่ไม่แทรกแซง
-เนื้อหาของผู้ใช้ (ไม่แก้ไขข้อความแทนเจ้าของ) — ทดสอบแล้วว่า admin
-เข้า `item_edit.php` ของคนอื่นได้ 403
+**Q: admin มีสิทธิ์อะไรบ้าง?**
+admin เข้าหน้าจัดการได้ตามที่ระบบกำหนด: ดูสถิติ (Dashboard), จัดการผู้ใช้
+(เพิ่ม / แก้ไข / ลบ ผ่าน `admin/user_create.php`, `admin/user_edit.php`,
+`admin/user_delete.php`) และจัดการประกาศของใครก็ได้ (แก้ไข / ทำเครื่องหมาย
+Completed / ลบ) โดยมีการป้องกัน: admin ลบหรือลดสิทธิ์ตัวเองไม่ได้ และต้องมี
+แอดมินเหลืออย่างน้อย 1 คนเสมอ
 
 **Q: ทำไมไม่ใช้ MD5/SHA กับรหัสผ่าน?**
 `password_hash()` (bcrypt, `$2y$`) ออกแบบมาสำหรับรหัสผ่าน:
@@ -207,7 +211,7 @@ jQuery โหลดใน `includes/footer.php` ใช้เขียน `assets
 `password_verify()` รองรับ upgrade  알고ริทึมในอนาคต
 
 **Q: ทดสอบอะไรมาแล้วบ้าง?**
-ชุดทดสอบอัตโนมัติ 224 กรณี: ownership (Case A/B/C/D), CSRF ทุก endpoint
+ชุดทดสอบอัตโนมัติ 223 กรณี: ownership (Case A/B/C/D), CSRF ทุก endpoint
 (รวม token ปลอม), XSS/SQLi payload, validation ข้อมูลผิดทุกฟอร์ม,
 guest เข้าหน้าคุ้มครอง, logout/session, AJAX email check, image upload
 (สร้าง/เปลี่ยน/ลบรูป + ไฟล์ไม่ใช่ภาพถูก reject + ลบไฟล์เมื่อลบประกาศ),

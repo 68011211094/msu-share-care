@@ -52,7 +52,7 @@
 
 **วิธี ก — File Manager (ง่ายสุด):**
 1. สร้าง zip ของโปรเจกต์โดย**ไม่รวม** `.env`, `.git`, `tests`
-   (zip พร้อมใช้แล้วอยู่ที่ `C:\Users\phets\AppData\Local\Temp\opencode\msu-share-care-deploy.zip`)
+   (บีบอัดเนื้อหาโฟลเดอร์โปรเจกต์เป็นไฟล์ `.zip` เก็บไว้ที่ใดก็ได้ในเครื่อง)
 2. เปิด **File Manager** → เข้าโฟลเดอร์ `htdocs/`
 3. อัปโหลด zip → คลิกขวา → **Extract** → เนื้อหาควรอยู่ที่ `htdocs/` ตรง ๆ
    (เช่น เห็น `index.php`, `.htaccess`, โฟลเดอร์ `config/`, `includes/`)

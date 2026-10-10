@@ -85,13 +85,20 @@ User ไม่สามารถ:
 
 Admin สามารถเข้าถึง:
 
-- Admin dashboard
-- รายการผู้ใช้
-- รายการสิ่งของ
-- การจัดการที่จำเป็น
-- สถิติพื้นฐาน
+- Admin dashboard และสถิติพื้นฐาน (ผู้ใช้ทั้งหมด, ประกาศทั้งหมด, Available, Completed, Donate, Exchange)
+- หน้าจัดการผู้ใช้ (`admin/users.php`) — ดูรายชื่อ, เพิ่ม (`admin/user_create.php`),
+  แก้ไข (`admin/user_edit.php`), ลบ (`admin/user_delete.php`)
+- หน้าจัดการประกาศ (`admin/items.php`) — ดู, เพิ่ม, แก้ไข, ลบ
+- จัดการ (แก้ไข / ทำเครื่องหมาย Completed / ลบ) ประกาศของผู้อื่นได้ตาม authorization logic (ดูหัวข้อ 6)
 
-Admin ไม่ควรมีสิทธิ์เกินความจำเป็นของ requirement
+ข้อจำกัดด้านความปลอดภัยที่ระบบบังคับใช้จริง:
+
+- Admin ลบบัญชีของตัวเองไม่ได้
+- Admin ลดสิทธิ์ตัวเองจาก Admin เป็น User ไม่ได้
+- ค่า `role` ตั้งได้เฉพาะ `user` หรือ `admin`
+- ต้องมี Admin เหลืออย่างน้อย 1 คน — ลบหรือลดสิทธิ์ Admin คนสุดท้ายไม่ได้
+
+หลักการเดิมยังคงอยู่: Admin มีสิทธิ์เท่าที่จำเป็นต่อการดูแลระบบ ไม่เพิ่มสิทธิ์เกิน requirement
 
 ## 6. Ownership / Authorization
 
@@ -106,6 +113,9 @@ current_user.id == item.owner_id
 ห้ามพึ่งเพียงการซ่อนปุ่มในหน้าเว็บ
 
 ต้องป้องกันกรณีผู้ใช้เปลี่ยน ID ใน URL หรือ request โดยตรง
+
+ข้อยกเว้นตาม role: หาก `current_user.role === 'admin'` ระบบ (ฝั่ง Server) อนุญาตให้
+แก้ไข / ลบ / เปลี่ยนสถานะรายการของผู้อื่นได้ โดยยังต้องผ่าน `require_admin()` และ CSRF ทุกครั้ง
 
 ### Ownership Test Cases
 

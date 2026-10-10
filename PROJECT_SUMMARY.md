@@ -107,7 +107,6 @@ Term_Project_002/
 │   └── items.php           # จัดการประกาศทั้งหมด (เพิ่ม/แก้ไข/ลบ)
 │
 ├── includes/               # โค้ดใช้ร่วมกัน
-│   ├── config.php          # โหลด .env + path
 │   ├── db_connect.php      # เชื่อมต่อฐานข้อมูล PDO
 │   ├── auth.php            # current_user / require_login / require_admin / require_owned_item
 │   ├── csrf.php            # สร้าง + ตรวจ CSRF token
@@ -271,7 +270,7 @@ Term_Project_002/
 
 ### ชุดทดสอบอัตโนมัติ
 
-ในโฟลเดอร์ `tests/` มีสคริปต์ PowerShell รวม **224 assertions**:
+ในโฟลเดอร์ `tests/` มีสคริปต์ PowerShell รวม **223 assertions**:
 
 | ชุดทดสอบ | ครอบคลุม |
 |---|---|
@@ -383,7 +382,7 @@ Term_Project_002/
 
 ## 13. ประวัติงานช่วงท้าย (Admin Features + Deploy)
 
-งานช่วงหลังสุด (ที่ยังไม่ได้อยู่ใน README เดิม) มี 3 commit:
+งานช่วงหลังสุด (ที่ยังไม่ได้อยู่ใน README เดิม) มี 5 commit:
 
 | Commit | สรุป |
 |---|---|
@@ -391,6 +390,7 @@ Term_Project_002/
 | `430d352` | **feat:** ให้แอดมินแก้ไข / ทำ Completed / ลบ ประกาศของใครก็ได้ |
 | `0b03c22` | **feat:** ให้แอดมินจัดการผู้ใช้ได้ (เพิ่ม / แก้ไข / ลบ) |
 | `f094a4b` | **feat:** ใส่ favicon + โลโก้บนแท็บเบราว์เซอร์ |
+| `13ff75a` | **docs:** เพิ่มเอกสารสรุปโปรเจกต์ภาษาไทย (`PROJECT_SUMMARY.md`) |
 
 **รายละเอียดสิ่งที่แก้/เพิ่ม**
 
@@ -408,7 +408,7 @@ Term_Project_002/
 - PHP lint ผ่านทุกไฟล์ที่แก้
 - รันชุดทดสอบ local แบบ end-to-end ครบ (admin item edit/complete/delete, 403 สำหรับ non-admin,
   user CRUD, guard ต่าง ๆ, ทดสอบ CSRF ทางลบ, favicon) — **ผ่าน 28/28**
-- Push GitHub แล้ว: `origin/main` = `f094a4b`
+- Push GitHub แล้ว: `origin/main` = `13ff75a`
 - อัปไฟล์ใหม่ 12 ไฟล์ขึ้นโฮสต์ผ่าน FTP สำเร็จ 12/12
 - ตรวจขนาดไฟล์บนโฮสต์เทียบกับ local — **ตรงกันทุกไฟล์**
 - ลบไฟล์วินิจฉัยชั่วคราวบนโฮสต์ (`dbcheck.php`, `probe_7f3k2.txt`) ออกแล้ว
@@ -419,12 +419,17 @@ Term_Project_002/
 
 | ด้าน | สถานะ |
 |---|---|
-| โค้ดในเครื่อง | ✅ ทำงานได้ครบ (เวอร์ชันล่าสุด `f094a4b`) |
-| GitHub | ✅ push ล่าสุดแล้ว (`origin/main` = `f094a4b`) |
+| โค้ดในเครื่อง | ✅ ทำงานได้ครบ (commit ล่าสุด `13ff75a`) |
+| GitHub | ✅ push ล่าสุดแล้ว (`origin/main` = `13ff75a`) |
 | เว็บบนโฮสต์จริง | ✅ ใช้งานได้ที่ `https://msu-share-care.freedev.app/` |
 | ฟีเจอร์แอดมินใหม่ | ✅ อัปขึ้นเซิร์ฟเวอร์แล้ว (12 ไฟล์) |
 | Favicon | ✅ ขึ้นเซิร์ฟเวอร์แล้ว |
 | รหัสผ่านที่หลุดในแชท | ✅ ผู้ใช้เปลี่ยนเองแล้ว |
+
+> **working tree ณ เวลาตรวจสอบ (ยังไม่ commit):** การออกแบบ UI ใหม่
+> (`assets/css/style.css`, `includes/header.php`, `assets/favicon.svg`)
+> และงานแก้เอกสาร (`README.md`, `PRESENTATION.md`, `PROJECT_SUMMARY.md`)
+> ยังอยู่เฉพาะในเครื่อง ยังไม่ commit/push
 
 ---
 
@@ -436,8 +441,10 @@ Term_Project_002/
    - แท็บเบราว์เซอร์ขึ้นโลโก้ SC
 2. **เปิด HTTPS/SSL** — ควรยืนยันว่าลิงก์ `https://` ใช้งานได้ และพิจารณาตั้ง
    cookie session เป็น `secure` เมื่อรันบน HTTPS จริง
-3. **ปรับ README.md ให้ตรงกับของจริง** — README เดิมยังเขียนว่า "แอดมินทำได้แค่ ดู + ลบ"
-   ซึ่งต้องอัปเดตให้ตรงกับฟีเจอร์จัดการผู้ใช้/ประกาศใหม่
+3. **อัปเดตเอกสารส่วนที่เหลือให้ตรงของจริง** — ปรับคำอธิบายสิทธิ์ Admin ใน README.md
+   ให้ตรงกับโค้ดแล้ว (งาน documentation fix) เหลือส่วนอื่นที่ควรตามต่อ เช่น
+   จำนวน test, ตารางไฟล์เอกสาร และชุดทดสอบ `tests/phase7_tests.ps1`
+   ที่ยัง assert พฤติกรรม admin แบบเก่า (admin แก้/ลบของคนอื่น -> 403)
 4. **เก็บกวาดไฟล์ Deploy ชั่วคราว** — ไฟล์ zip/สคริปต์ทดสอบชั่วคราวในโฟลเดอร์ Temp (ไม่กระทบตัวเว็บ)
 
 ---
@@ -452,7 +459,7 @@ Term_Project_002/
 | `PRESENTATION.md` | คู่มือนำเสนอ + demo flow + Q&A |
 | `PROJECT_SUMMARY.md` | เอกสารฉบับนี้ — สรุปทำอะไรมาบ้าง |
 | `sql/schema.sql` | สคริปต์สร้างฐานข้อมูล |
-| `tests/` | ชุดทดสอบอัตโนมัติ (224 assertions) |
+| `tests/` | ชุดทดสอบอัตโนมัติ (223 assertions) |
 
 **ลิงก์เว็บจริง:** <https://msu-share-care.freedev.app/>
 
