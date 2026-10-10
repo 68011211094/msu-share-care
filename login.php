@@ -50,32 +50,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require __DIR__ . '/includes/header.php';
 ?>
-    <h1>เข้าสู่ระบบ</h1>
-
-    <div class="form-box">
-        <?php if (!empty($errors)) { ?>
-            <div class="alert alert-error">
-                <?php foreach ($errors as $error) { ?>
-                    <p><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
+    <div class="auth-wrap">
+        <div class="auth-brand">
+            <img src="<?php echo app_url('assets/favicon.svg'); ?>" alt="โลโก้ MSU Share &amp; Care">
+            <h1>ยินดีต้อนรับกลับเข้าสู่ MSU Share &amp; Care</h1>
+            <p>ส่งต่อสิ่งของที่ยังมีคุณค่าให้เพื่อนนักศึกษา และสร้างชุมชน MSU ที่น่าอยู่ด้วยกัน</p>
+            <p class="auth-quote">&ldquo;แชร์สิ่งดี ๆ สร้างสังคม MSU ให้น่าอยู่&rdquo;</p>
+        </div>
+        <div class="auth-form">
+            <div class="form-box">
+                <?php if (!empty($errors)) { ?>
+                    <div class="alert alert-error">
+                        <?php foreach ($errors as $error) { ?>
+                            <p><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php } ?>
+                    </div>
                 <?php } ?>
+
+                <form method="post" action="login.php">
+                    <?php echo csrf_field(); ?>
+
+                    <label for="email">อีเมล</label>
+                    <input type="email" id="email" name="email" maxlength="150" required
+                           value="<?php echo htmlspecialchars($oldEmail, ENT_QUOTES, 'UTF-8'); ?>">
+
+                    <label for="password">รหัสผ่าน</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn">เข้าสู่ระบบ</button>
+                    </div>
+
+                    <p class="form-hint">ยังไม่มีบัญชี? <a href="register.php">สมัครสมาชิก</a></p>
+                </form>
             </div>
-        <?php } ?>
-
-        <form method="post" action="login.php">
-            <?php echo csrf_field(); ?>
-
-            <label for="email">อีเมล</label>
-            <input type="email" id="email" name="email" maxlength="150" required
-                   value="<?php echo htmlspecialchars($oldEmail, ENT_QUOTES, 'UTF-8'); ?>">
-
-            <label for="password">รหัสผ่าน</label>
-            <input type="password" id="password" name="password" required>
-
-            <div class="form-actions">
-                <button type="submit" class="btn">เข้าสู่ระบบ</button>
-            </div>
-
-            <p class="form-hint">ยังไม่มีบัญชี? <a href="register.php">สมัครสมาชิก</a></p>
-        </form>
+        </div>
     </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

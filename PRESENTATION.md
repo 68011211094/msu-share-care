@@ -127,7 +127,7 @@ index.php, register.php, login.php, logout.php   → หน้าหลัก / 
 item_*.php, my_items.php                         → CRUD ประกาศ (มี ownership check)
 admin/                                           → หน้าแอดมิน (require_admin + basePath='../')
 includes/  auth, csrf, validation, db_connect, image_upload,
-           header, nav, footer                   → ส่วนที่ใช้ร่วมกัน
+           header, nav, footer, admin_sidebar            → ส่วนที่ใช้ร่วมกัน
 config/    config.php (env+session), db.php      → ค่าตั้งค่า + โหลด .env
 sql/schema.sql                                   → โครงสร้างฐานข้อมูล
 uploads/   โฟลเดอร์เก็บภาพที่อัปโหลด (.gitkeep +
@@ -163,8 +163,8 @@ users (id, full_name, email UNIQUE, password_hash, role ENUM(user,admin),
 
 | ภัย | กลไก | ตัวอย่างโค้ด |
 |---|---|---|
-| SQL Injection | Prepared statements ทุกจุด, `EMULATE_PREPARES=false` | `login.php:33`, `item_edit.php:92-104` |
-| XSS | `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` ทุกจุดแสดงผล | `index.php:45`, `nav.php:19`, `header.php:18` |
+| SQL Injection | Prepared statements ทุกจุด, `EMULATE_PREPARES=false` | `login.php:33`, `item_edit.php:93,106` |
+| XSS | `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` ทุกจุดแสดงผล | `index.php:125,188`, `nav.php:36`, `header.php:19` |
 | CSRF | token ต่อ session + `hash_equals` ทุก POST | `csrf.php:18-28` |
 | Session fixation | `session_regenerate_id(true)` ตอน login/สมัครสำเร็จ | `login.php:42`, `register.php:98` |
 | Session hijack | `httponly` + `strict_mode` + `only_cookies` + `SameSite=Lax` | `config/config.php:9-12` |

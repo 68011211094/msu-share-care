@@ -105,44 +105,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require __DIR__ . '/includes/header.php';
 ?>
-    <h1>สมัครสมาชิก</h1>
-
-    <div class="form-box">
-        <?php if (!empty($errors)) { ?>
-            <div class="alert alert-error">
-                <?php foreach ($errors as $error) { ?>
-                    <p><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
+    <div class="auth-wrap">
+        <div class="auth-brand">
+            <img src="<?php echo app_url('assets/favicon.svg'); ?>" alt="โลโก้ MSU Share &amp; Care">
+            <h1>เริ่มต้นแบ่งปันสิ่งดี ๆ ร่วมกัน</h1>
+            <p>สมัครสมาชิกฟรี เพียงใช้บัญชีเดียวเพื่อลงประกาศสิ่งของ บริจาค หรือแลกเปลี่ยนภายในชุมชน MSU</p>
+            <p class="auth-quote">&ldquo;Share more. Waste less. Care together.&rdquo;</p>
+        </div>
+        <div class="auth-form">
+            <div class="form-box">
+                <?php if (!empty($errors)) { ?>
+                    <div class="alert alert-error">
+                        <?php foreach ($errors as $error) { ?>
+                            <p><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php } ?>
+                    </div>
                 <?php } ?>
+
+                <form method="post" action="register.php">
+                    <?php echo csrf_field(); ?>
+
+                    <label for="full_name">ชื่อ-นามสกุล <span class="label-required">*</span></label>
+                    <input type="text" id="full_name" name="full_name" maxlength="100" required
+                           value="<?php echo htmlspecialchars($oldValues['full_name'], ENT_QUOTES, 'UTF-8'); ?>">
+
+                    <label for="email">อีเมล <span class="label-required">*</span></label>
+                    <input type="email" id="email" name="email" maxlength="150" required
+                           value="<?php echo htmlspecialchars($oldValues['email'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <small id="email-status" class="form-status"></small>
+
+                    <label for="password">รหัสผ่าน <span class="label-required">*</span> (อย่างน้อย 8 ตัวอักษร)</label>
+                    <input type="password" id="password" name="password" minlength="8" required>
+
+                    <label for="password_confirm">ยืนยันรหัสผ่าน <span class="label-required">*</span></label>
+                    <input type="password" id="password_confirm" name="password_confirm" minlength="8" required>
+
+                    <label for="contact_info">ช่องทางติดต่อ (ไม่บังคับ เช่น เบอร์โทร)</label>
+                    <input type="text" id="contact_info" name="contact_info" maxlength="150"
+                           value="<?php echo htmlspecialchars($oldValues['contact_info'], ENT_QUOTES, 'UTF-8'); ?>">
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn">สมัครสมาชิก</button>
+                    </div>
+
+                    <p class="form-hint">มีบัญชีแล้ว? <a href="login.php">เข้าสู่ระบบ</a></p>
+                </form>
             </div>
-        <?php } ?>
-
-        <form method="post" action="register.php">
-            <?php echo csrf_field(); ?>
-
-            <label for="full_name">ชื่อ-นามสกุล *</label>
-            <input type="text" id="full_name" name="full_name" maxlength="100" required
-                   value="<?php echo htmlspecialchars($oldValues['full_name'], ENT_QUOTES, 'UTF-8'); ?>">
-
-            <label for="email">อีเมล *</label>
-            <input type="email" id="email" name="email" maxlength="150" required
-                   value="<?php echo htmlspecialchars($oldValues['email'], ENT_QUOTES, 'UTF-8'); ?>">
-            <small id="email-status" class="form-status"></small>
-
-            <label for="password">รหัสผ่าน * (อย่างน้อย 8 ตัวอักษร)</label>
-            <input type="password" id="password" name="password" minlength="8" required>
-
-            <label for="password_confirm">ยืนยันรหัสผ่าน *</label>
-            <input type="password" id="password_confirm" name="password_confirm" minlength="8" required>
-
-            <label for="contact_info">ช่องทางติดต่อ (ไม่บังคับ เช่น เบอร์โทร)</label>
-            <input type="text" id="contact_info" name="contact_info" maxlength="150"
-                   value="<?php echo htmlspecialchars($oldValues['contact_info'], ENT_QUOTES, 'UTF-8'); ?>">
-
-            <div class="form-actions">
-                <button type="submit" class="btn">สมัครสมาชิก</button>
-            </div>
-
-            <p class="form-hint">มีบัญชีแล้ว? <a href="login.php">เข้าสู่ระบบ</a></p>
-        </form>
+        </div>
     </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

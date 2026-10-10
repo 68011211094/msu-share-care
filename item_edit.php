@@ -129,7 +129,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require __DIR__ . '/includes/header.php';
 ?>
-    <h1>แก้ไขประกาศ</h1>
+    <a class="back-link" href="item_detail.php?id=<?php echo $itemId; ?>">&larr; กลับไปหน้ารายละเอียด</a>
+
+    <div class="page-head">
+        <h1>แก้ไขประกาศ</h1>
+        <p class="page-sub">แก้ไขรายละเอียดหรือรูปภาพของประกาศนี้</p>
+    </div>
 
     <div class="form-box">
         <?php if (!empty($errors)) { ?>
@@ -144,33 +149,33 @@ require __DIR__ . '/includes/header.php';
               enctype="multipart/form-data">
             <?php echo csrf_field(); ?>
 
-            <label for="title">ชื่อสิ่งของ *</label>
+            <label for="title">ชื่อสิ่งของ <span class="label-required">*</span></label>
             <input type="text" id="title" name="title" maxlength="120" required
                    value="<?php echo htmlspecialchars($oldValues['title'], ENT_QUOTES, 'UTF-8'); ?>">
 
-            <label>ประเภทประกาศ *</label>
+            <p class="form-section-title">ประเภทประกาศ <span class="label-required">*</span></p>
             <label class="radio-label">
                 <input type="radio" name="type" value="donate"
                     <?php echo $oldValues['type'] === 'donate' ? 'checked' : ''; ?>>
-                Donate (บริจาค)
+                Donate (บริจาค) — ส่งต่อให้ฟรี
             </label>
             <label class="radio-label">
                 <input type="radio" name="type" value="exchange"
                     <?php echo $oldValues['type'] === 'exchange' ? 'checked' : ''; ?>>
-                Exchange (แลกเปลี่ยน)
+                Exchange (แลกเปลี่ยน) — แลกเปลี่ยนของกันและกัน
             </label>
 
-            <label for="description">รายละเอียด *</label>
+            <label for="description">รายละเอียด <span class="label-required">*</span></label>
             <textarea id="description" name="description" maxlength="5000" required
                       ><?php echo htmlspecialchars($oldValues['description'], ENT_QUOTES, 'UTF-8'); ?></textarea>
 
-            <label for="contact">ช่องทางติดต่อ *</label>
+            <label for="contact">ช่องทางติดต่อ <span class="label-required">*</span></label>
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
 
             <label for="image">รูปภาพ (ไม่บังคับ)</label>
             <div class="file-upload">
-                <label class="file-upload-label" for="image">เลือกรูปภาพ</label>
+                <label class="file-upload-label" for="image">เลือกรูปภาพใหม่</label>
                 <span class="file-upload-name" id="image-name"><?php echo !empty($item['image']) ? 'ไฟล์เดิม' : 'ยังไม่เลือกไฟล์'; ?></span>
                 <input type="file" id="image" name="image"
                        accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
@@ -180,7 +185,7 @@ require __DIR__ . '/includes/header.php';
                     <img src="<?php echo htmlspecialchars(app_url($item['image']), ENT_QUOTES, 'UTF-8'); ?>"
                          alt="รูปภาพปัจจุบัน">
                 <?php } else { ?>
-                    <div class="preview-empty">ตัวอย่างภาพ (แสดงเป็นสี่เหลี่ยม 1:1) จะแสดงที่นี่</div>
+                    <div class="preview-empty">ตัวอย่างภาพ (แสดงเป็นรูปสี่เหลี่ยมจัตุรัส) จะแสดงที่นี่</div>
                 <?php } ?>
             </div>
             <p class="form-hint">ขนาดไม่เกิน 20 MB รองรับ JPG/PNG/GIF</p>

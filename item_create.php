@@ -90,7 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require __DIR__ . '/includes/header.php';
 ?>
-    <h1>สร้างประกาศ</h1>
+    <div class="page-head">
+        <h1>สร้างประกาศ</h1>
+        <p class="page-sub">แบ่งปันสิ่งของที่คุณไม่ใช้แล้ว ให้เพื่อนนักศึกษาได้ใช้ต่อ</p>
+    </div>
 
     <div class="form-box">
         <?php if (!empty($errors)) { ?>
@@ -104,44 +107,44 @@ require __DIR__ . '/includes/header.php';
         <form method="post" action="item_create.php" enctype="multipart/form-data">
             <?php echo csrf_field(); ?>
 
-            <label for="title">ชื่อสิ่งของ *</label>
+            <label for="title">ชื่อสิ่งของ <span class="label-required">*</span></label>
             <input type="text" id="title" name="title" maxlength="120" required
                    value="<?php echo htmlspecialchars($oldValues['title'], ENT_QUOTES, 'UTF-8'); ?>">
 
-            <label>ประเภทประกาศ *</label>
+            <p class="form-section-title">ประเภทประกาศ <span class="label-required">*</span></p>
             <label class="radio-label">
                 <input type="radio" name="type" value="donate"
                     <?php echo $oldValues['type'] === 'donate' ? 'checked' : ''; ?>>
-                Donate (บริจาค)
+                Donate (บริจาค) — ส่งต่อให้ฟรี
             </label>
             <label class="radio-label">
                 <input type="radio" name="type" value="exchange"
                     <?php echo $oldValues['type'] === 'exchange' ? 'checked' : ''; ?>>
-                Exchange (แลกเปลี่ยน)
+                Exchange (แลกเปลี่ยน) — แลกเปลี่ยนของกันและกัน
             </label>
 
-            <label for="description">รายละเอียด *</label>
+            <label for="description">รายละเอียด <span class="label-required">*</span></label>
             <textarea id="description" name="description" maxlength="5000" required
                       ><?php echo htmlspecialchars($oldValues['description'], ENT_QUOTES, 'UTF-8'); ?></textarea>
 
-            <label for="contact">ช่องทางติดต่อ * (เช่น เบอร์โทร หรือ Line)</label>
+            <label for="contact">ช่องทางติดต่อ <span class="label-required">*</span> (เช่น เบอร์โทร หรือ Line)</label>
             <input type="text" id="contact" name="contact" maxlength="150" required
                    value="<?php echo htmlspecialchars($oldValues['contact'], ENT_QUOTES, 'UTF-8'); ?>">
 
             <label for="image">รูปภาพ (ไม่บังคับ)</label>
             <div class="file-upload">
-                <label class="file-upload-label" for="image">เลือกรูปภาพ</label>
+                <label class="file-upload-label" for="image">เลือกภาพจากเครื่อง</label>
                 <span class="file-upload-name" id="image-name">ยังไม่เลือกไฟล์</span>
                 <input type="file" id="image" name="image"
                        accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
             </div>
             <div class="preview-wrap" id="image-preview">
-                <div class="preview-empty">ตัวอย่างภาพ (แสดงเป็นสี่เหลี่ยม 1:1) จะแสดงที่นี่</div>
+                <div class="preview-empty">ตัวอย่างภาพ (แสดงเป็นรูปสี่เหลี่ยมจัตุรัส) จะแสดงที่นี่</div>
             </div>
             <p class="form-hint">ขนาดไม่เกิน 20 MB รองรับ JPG/PNG/GIF</p>
 
             <div class="form-actions">
-                <button type="submit" class="btn">ประกาศ</button>
+                <button type="submit" class="btn">ประกาศสิ่งของ</button>
             </div>
         </form>
     </div>

@@ -38,66 +38,76 @@ $items = $statement->fetchAll();
 
 require __DIR__ . '/../includes/header.php';
 ?>
-    <h1>จัดการประกาศ</h1>
-    <p>ประกาศทั้งหมด <?php echo count($items); ?> รายการ</p>
+    <div class="admin-layout">
+        <?php require __DIR__ . '/../includes/admin_sidebar.php'; ?>
+        <div class="admin-content">
+            <div class="page-head">
+                <h1>จัดการประกาศ</h1>
+                <p class="page-sub">ประกาศทั้งหมด <?php echo count($items); ?> รายการ</p>
+            </div>
 
-    <div class="admin-links">
-        <a class="btn btn-secondary" href="<?php echo app_url('item_create.php'); ?>">เพิ่มประกาศ</a>
+            <div class="page-actions">
+                <a class="btn" href="<?php echo app_url('item_create.php'); ?>">+ เพิ่มประกาศ</a>
+            </div>
+
+            <?php if (empty($items)) { ?>
+                <div class="empty-state">
+                    <p><strong>ยังไม่มีประกาศ</strong></p>
+                    <p>ประกาศจากผู้ใช้จะแสดงในตารางนี้</p>
+                </div>
+            <?php } else { ?>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อสิ่งของ</th>
+                                <th>เจ้าของ</th>
+                                <th>ประเภท</th>
+                                <th>สถานะ</th>
+                                <th>ประกาศเมื่อ</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($items as $item) { ?>
+                                <tr>
+                                    <td><?php echo (int) $item['id']; ?></td>
+                                    <td>
+                                        <a href="<?php echo app_url('item_detail.php?id=' . (int) $item['id']); ?>">
+                                            <?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>
+                                        </a>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($item['owner_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <span class="badge <?php echo $item['type'] === 'donate' ? 'badge-donate' : 'badge-exchange'; ?>">
+                                            <?php echo $item['type'] === 'donate' ? 'Donate' : 'Exchange'; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge <?php echo $item['status'] === 'available' ? 'badge-available' : 'badge-completed'; ?>">
+                                            <?php echo $item['status'] === 'available' ? 'Available' : 'Completed'; ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo date('d/m/Y', strtotime($item['created_at'])); ?></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <a class="btn btn-outline btn-small"
+                                               href="<?php echo app_url('item_edit.php?id=' . (int) $item['id']); ?>">แก้ไข</a>
+                                            <form class="inline-form" method="post" action="items.php"
+                                                  data-confirm="ต้องการลบประกาศนี้จริงหรือไม่?">
+                                                <?php echo csrf_field(); ?>
+                                                <input type="hidden" name="delete_id" value="<?php echo (int) $item['id']; ?>">
+                                                <button type="submit" class="btn btn-danger btn-small">ลบ</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php } ?>
+        </div>
     </div>
-
-    <?php if (empty($items)) { ?>
-        <div class="empty-state">
-            <p><strong>ยังไม่มีประกาศ</strong></p>
-        </div>
-    <?php } else { ?>
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>ชื่อสิ่งของ</th>
-                        <th>เจ้าของ</th>
-                        <th>ประเภท</th>
-                        <th>สถานะ</th>
-                        <th>ประกาศเมื่อ</th>
-                        <th>จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($items as $item) { ?>
-                        <tr>
-                            <td><?php echo (int) $item['id']; ?></td>
-                            <td>
-                                <a href="<?php echo app_url('item_detail.php?id=' . (int) $item['id']); ?>">
-                                    <?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>
-                                </a>
-                            </td>
-                            <td><?php echo htmlspecialchars($item['owner_name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td>
-                                <span class="badge <?php echo $item['type'] === 'donate' ? 'badge-donate' : 'badge-exchange'; ?>">
-                                    <?php echo $item['type'] === 'donate' ? 'Donate' : 'Exchange'; ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge <?php echo $item['status'] === 'available' ? 'badge-available' : 'badge-completed'; ?>">
-                                    <?php echo $item['status'] === 'available' ? 'Available' : 'Completed'; ?>
-                                </span>
-                            </td>
-                            <td><?php echo date('d/m/Y', strtotime($item['created_at'])); ?></td>
-                            <td>
-                                <a class="btn btn-secondary btn-small"
-                                   href="<?php echo app_url('item_edit.php?id=' . (int) $item['id']); ?>">แก้ไข</a>
-                                <form class="inline-form" method="post" action="items.php"
-                                      data-confirm="ต้องการลบประกาศนี้จริงหรือไม่?">
-                                    <?php echo csrf_field(); ?>
-                                    <input type="hidden" name="delete_id" value="<?php echo (int) $item['id']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-small">ลบ</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
-    <?php } ?>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

@@ -13,7 +13,7 @@ jQuery(function ($) {
     };
 
     $nav.on('click', 'a, button', function () {
-        if (window.matchMedia('(max-width: 720px)').matches) {
+        if (window.matchMedia('(max-width: 760px)').matches) {
             closeNav();
         }
     });
