@@ -17,8 +17,8 @@ ALTER TABLE users AUTO_INCREMENT = 1;
 ALTER TABLE items AUTO_INCREMENT = 1;
 
 INSERT INTO users (full_name, email, password_hash, role, contact_info) VALUES
-('นาย สมชาย ใจดี', 'studenta@example.com', '$2y$10$c/RvfoS7ue7SsM3ihpE14.Go9gaeSv.c1rRA8nlN4n2t1tddrB.jm', 'admin', '081-111-2222'),
-('นางสาว สมหญิง รักเรียน', 'studentb@example.com', '$2y$10$c/RvfoS7ue7SsM3ihpE14.Go9gaeSv.c1rRA8nlN4n2t1tddrB.jm', 'user', '082-333-4444');
+('นาย สมชาย ใจดี', 'studenta@example.com', '<hash ของรหัสผ่านที่ได้จาก password_hash()>', 'admin', '081-111-2222'),
+('นางสาว สมหญิง รักเรียน', 'studentb@example.com', '<hash ของรหัสผ่านที่ได้จาก password_hash()>', 'user', '082-333-4444');
 
 INSERT INTO items (owner_id, title, description, type, status, contact) VALUES
 (1, 'กระเป๋าเป้นักเรียน สภาพดี', 'กระเป๋าเป้ ใช้งานมาประมาณ 1 ปี ซีดเล็กน้อย ซิปทำงานปกติ', 'donate', 'available', '081-111-2222'),

@@ -145,7 +145,7 @@ Term_Project_002/
 
 ## 5. ฐานข้อมูล
 
-ใช้ฐานข้อมูลชื่อ **`msu_share_care`** (local) / **`if0_43130468_msu`** (บนโฮสต์จริง) มี 2 ตาราง:
+ใช้ฐานข้อมูลชื่อ **`msu_share_care`** (local) / **`if0_xxxx_msu`** (บนโฮสต์จริง) มี 2 ตาราง:
 
 ### ตาราง `users`
 
@@ -289,12 +289,12 @@ Term_Project_002/
 | รายการ | ค่า |
 |---|---|
 | URL เว็บ | `https://msu-share-care.freedev.app/` |
-| บัญชี | `if0_43130468` |
+| บัญชี | `if0_xxxx` |
 | Web root | `/htdocs` (โฟลเดอร์ `htdocs/` ตรง ๆ) |
-| MySQL host | `sql301.infinityfree.com` |
-| MySQL user | `if0_43130468` |
-| ชื่อฐานข้อมูล | `if0_43130468_msu` |
-| FTP host | `ftpupload.net` (185.27.134.11:21) |
+| MySQL host | `sqlXXX.infinityfree.com` |
+| MySQL user | `if0_xxxx` |
+| ชื่อฐานข้อมูล | `if0_xxxx_msu` |
+| FTP host | `ftpupload.net` (ดู IP จาก panel) |
 
 **ขั้นตอนที่ทำไปแล้ว**
 
@@ -304,10 +304,10 @@ Term_Project_002/
 
    ```text
    APP_DEBUG=false
-   DB_HOST=sql301.infinityfree.com
+   DB_HOST=sqlXXX.infinityfree.com
    DB_PORT=3306
-   DB_NAME=if0_43130468_msu
-   DB_USER=if0_43130468
+   DB_NAME=if0_xxxx_msu
+   DB_USER=if0_xxxx
    DB_PASS=<รหัสจาก panel>
    ```
 
